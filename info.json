@@ -1,7 +1,7 @@
 {
-  "name": "plumbing",
-  "title": "Underground Plumbing",
-  "description": "Route your pipes freely underground, and save a ton of UPS on fluid updates.",
+  "name": "beltlayer",
+  "title": "Beltlayer",
+  "description": "Route your belts freely underground.",
   "factorio_version": "0.16",
   "author": "Therax",
   "version": "0.1.0"
