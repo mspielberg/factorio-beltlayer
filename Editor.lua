@@ -223,7 +223,8 @@ end
 
 local function insert_container_inventory_to_buffer(container, buffer)
   local inv = container.get_inventory(defines.inventory.chest)
-  for _, stack in ipairs(inv) do
+  for i=1,#inv do
+    local stack = inv[i]
     if stack.valid_for_read then
       buffer.insert(stack)
       stack.clear()
@@ -234,9 +235,10 @@ end
 local function insert_transport_lines_to_buffer(entity, buffer)
   for i=1,2 do
     local tl = entity.get_transport_line(i)
-    for _, stack in ipairs(tl) do
-      buffer[#buffer+1].swap_stack(stack)
+    for j=1,#tl do
+      buffer.insert(tl[j])
     end
+    tl.clear()
   end
 end
 
