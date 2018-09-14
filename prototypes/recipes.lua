@@ -3,14 +3,12 @@ require "util"
 local function find_underground_belt_result(recipe)
   for _, root in ipairs{recipe, recipe.normal, recipe.expensive} do
     if root then
-      if root.result then
-        if data.raw["underground-belt"][root.result] then
-          return root.result
-        end
-      elseif root.results then
-        for _, result in ipairs(root.results) do
-          if data.raw["underground-belt"][result.name] then
-            return root.result
+      local results = root.results or {{name = root.result}}
+      for _, result in ipairs(results) do
+        local item = data.raw.item[result.name]
+        if item and item.place_result then
+          if data.raw["underground-belt"][item.place_result] then
+            return result.name
           end
         end
       end
@@ -30,6 +28,7 @@ local function make_recipe(proto, base_result)
         for i, result in ipairs(root.results) do
           if result.name == base_result then
             root.results[i].name = recipe.name
+            root.results[i].amount = 1
           end
         end
       end
