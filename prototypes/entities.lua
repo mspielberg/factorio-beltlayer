@@ -57,7 +57,7 @@ data:extend{
     name = "beltlayer-buffer",
     collision_box = {{-0.1, -0.1}, {0.1, 0.1}},
     collision_mask = {},
-    flags = {"player-creation", "not-blueprintable", "not-deconstructable"},
+    flags = {"player-creation", "hide-alt-info", "not-blueprintable", "not-deconstructable"},
     inventory_size = Constants.CONNECTOR_CAPACITY,
     picture = empty_sprite,
   }
