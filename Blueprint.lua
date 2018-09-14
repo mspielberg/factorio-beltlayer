@@ -291,9 +291,21 @@ local function create_entity_filter(tool)
   if not next(set) then
     return function(_) return true end
   elseif tool.entity_filter_mode == defines.deconstruction_item.entity_filter_mode.blacklist then
-    return function(name) return not set[name] end
+    return function(entity)
+      if entity.name == "entity-ghost" then
+        return not set[entity.ghost_name]
+      else
+        return not set[entity.name]
+      end
+    end
   else
-    return function(name) return set[name] end
+    return function(entity)
+      if entity.name == "entity-ghost" then
+        return set[entity.ghost_name]
+      else
+        return set[entity.name]
+      end
+    end
   end
 end
 
@@ -302,23 +314,25 @@ local function order_underground_deconstruction(player, area, filter)
   local num_to_deconstruct = 0
   local underground_entities = find_in_area(editor_surface, area, {})
   for _, entity in ipairs(underground_entities) do
-    if is_connector(entity.name) then
-      entity.minable = true
-      entity.order_deconstruction(entity.force)
-      entity.minable = false
-    elseif entity.name == "entity-ghost" then
-      entity.destroy()
-    elseif entity.type == "transport-belt" or entity.type == "underground-belt" then
-      local proxy = nauvis.create_entity{
-        name = "beltlayer-bpproxy-"..entity.name,
-        position = entity.position,
-        force = entity.force,
-        direction = entity.direction,
-      }
-      proxy.destructible = false
-      proxy.order_deconstruction(proxy.force, player)
-      entity.order_deconstruction(entity.force)
-      num_to_deconstruct = num_to_deconstruct + 1
+    if filter(entity) then
+      if is_connector(entity.name) then
+        entity.minable = true
+        entity.order_deconstruction(entity.force)
+        entity.minable = false
+      elseif entity.name == "entity-ghost" then
+        entity.destroy()
+      elseif entity.type == "transport-belt" or entity.type == "underground-belt" then
+        local proxy = nauvis.create_entity{
+          name = "beltlayer-bpproxy-"..entity.name,
+          position = entity.position,
+          force = entity.force,
+          direction = entity.direction,
+        }
+        proxy.destructible = false
+        proxy.order_deconstruction(proxy.force, player)
+        entity.order_deconstruction(entity.force)
+        num_to_deconstruct = num_to_deconstruct + 1
+      end
     end
   end
   return underground_entities
@@ -349,10 +363,10 @@ local function on_player_deconstructed_surface_area(player, area, filter)
   end
 end
 
-local function on_player_deconstructed_underground_area(player, area)
+local function on_player_deconstructed_underground_area(player, area, filter)
   local underground_entities = order_underground_deconstruction(player, area)
   for _, entity in ipairs(underground_entities) do
-    if entity.name == "beltlayer-connector" then
+    if filter(entity) and is_connector(entity.name) then
       local counterpart = surface_counterpart(entity)
       if counterpart then
         counterpart.order_deconstruction(counterpart.force)
@@ -370,7 +384,7 @@ function M.on_player_deconstructed_area(player_index, area, _, alt)
   if player.surface == game.surfaces.nauvis then
     return on_player_deconstructed_surface_area(player, area, filter)
   elseif player.surface == editor_surface then
-    return on_player_deconstructed_underground_area(player, area)
+    return on_player_deconstructed_underground_area(player, area, filter)
   end
 end
 
