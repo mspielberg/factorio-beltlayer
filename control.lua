@@ -53,6 +53,10 @@ local event_handlers = {
     Blueprint.on_player_setup_blueprint(event)
   end,
 
+  on_pre_ghost_deconstructed = function(event)
+    Blueprint.on_pre_ghost_deconstructed(event.player_index, event.ghost)
+  end,
+
   on_player_deconstructed_area = function(event)
     Blueprint.on_player_deconstructed_area(event.player_index, event.area, event.item, event.alt)
   end,

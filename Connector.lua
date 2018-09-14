@@ -40,7 +40,9 @@ function Connector:valid()
 end
 
 function Connector:rotate()
-  self.above_to_below = self.above_loader.loader_type == "input"
+  if self.above_loader and self.above_loader.valid then
+    self.above_to_below = self.above_loader.loader_type == "input"
+  end
 end
 
 local function transfer_special(from, to, name)

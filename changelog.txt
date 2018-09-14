@@ -1,0 +1,8 @@
+---------------------------------------------------------------------------------------------------
+Version: 0.1.0 - First public release
+Date: 14.09.2018
+  Major Features:
+    - Underground belt connector
+    - Interactive editor surface
+    - Blueprint/Logistic robot support
+    - Compatibility with underground belts added by mods

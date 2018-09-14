@@ -56,14 +56,27 @@ local function is_connector(name)
   return name:find("%-beltlayer%-connector$")
 end
 
+local function is_connector_or_ghost(entity)
+  return is_connector(entity.name) or (entity.name == "entity-ghost" and is_connector(entity.ghost_name))
+end
+
 local function find_in_area(surface, area, args)
-  local find_args = util.table.deepcopy(args)
+  local position
   if area.left_top.x >= area.right_bottom.x or area.left_top.y >= area.right_bottom.y then
-    find_args.position = area.left_top
-  else
-    find_args.area = area
+    position = area.left_top
   end
-  return surface.find_entities_filtered(find_args)
+  if args then
+    local find_args = util.table.deepcopy(args)
+    find_args.position = position
+    find_args.area = area
+    return surface.find_entities_filtered(find_args)
+  else
+    if position then
+      return surface.find_entities({{position.x, position.y}, {position.x + 0.1, position.y + 0.1}})
+    else
+      return surface.find_entities(area)
+    end
+  end
 end
 
 local function nonproxy_name(name)
@@ -270,7 +283,21 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 -- deconstruction
 
-local function order_underground_deconstruction(player, area)
+local function create_entity_filter(tool)
+  local set = {}
+  for _, item in pairs(tool.entity_filters) do
+    set[item] = true
+  end
+  if not next(set) then
+    return function(_) return true end
+  elseif tool.entity_filter_mode == defines.deconstruction_item.entity_filter_mode.blacklist then
+    return function(name) return not set[name] end
+  else
+    return function(name) return set[name] end
+  end
+end
+
+local function order_underground_deconstruction(player, area, filter)
   local nauvis = game.surfaces.nauvis
   local num_to_deconstruct = 0
   local underground_entities = find_in_area(editor_surface, area, {})
@@ -297,17 +324,26 @@ local function order_underground_deconstruction(player, area)
   return underground_entities
 end
 
-local function on_player_deconstructed_surface_area(player, area)
-  local selected_loaders = find_in_area(game.surfaces.nauvis, area, {type = "loader", limit = 1})
-  local selected_connectors = {}
-  for _, loader in ipairs(selected_loaders) do
+local function connector_in_area(surface, area)
+  local loaders = find_in_area(surface, area, {type = "loader", limit = 1})
+  for _, loader in ipairs(loaders) do
     if is_connector(loader.name) then
-      selected_connectors[#selected_connectors+1] = loader
+      return true
     end
   end
+  return false
+end
 
-  if not next(selected_connectors) then return end
-  local underground_entities = order_underground_deconstruction(player, area)
+local previous_connector_ghost_deconstruction_tick
+local previous_connector_ghost_deconstruction_player_index
+
+local function on_player_deconstructed_surface_area(player, area, filter)
+  if not connector_in_area(player.surface, area) and
+    (player.index ~= previous_connector_ghost_deconstruction_player_index or
+    game.tick ~= previous_connector_ghost_deconstruction_tick) then
+    return
+  end
+  local underground_entities = order_underground_deconstruction(player, area, filter)
   if settings.get_player_settings(player)["beltlayer-deconstruction-warning"].value then
     player.print({"beltlayer-message.marked-for-deconstruction", #underground_entities})
   end
@@ -328,10 +364,20 @@ end
 function M.on_player_deconstructed_area(player_index, area, _, alt)
   if alt then return end
   local player = game.players[player_index]
+  local tool = player.cursor_stack
+  if not tool or not tool.is_deconstruction_item then return end
+  local filter = create_entity_filter(tool)
   if player.surface == game.surfaces.nauvis then
-    return on_player_deconstructed_surface_area(player, area)
+    return on_player_deconstructed_surface_area(player, area, filter)
   elseif player.surface == editor_surface then
     return on_player_deconstructed_underground_area(player, area)
+  end
+end
+
+function M.on_pre_ghost_deconstructed(player_index, ghost)
+  if is_connector(ghost.ghost_name) then
+    previous_connector_ghost_deconstruction_player_index = player_index
+    previous_connector_ghost_deconstruction_tick = game.tick
   end
 end
 
@@ -368,10 +414,10 @@ function M.on_player_setup_blueprint(event)
   local area = event.area
 
   local anchor_connector
-  local loaders = find_in_area(surface, area, {type = "loader"})
-  for _, loader in ipairs(loaders) do
-    if is_connector(loader.name) then
-      anchor_connector = loader
+  local entities = find_in_area(surface, area, {})
+  for _, entity in ipairs(entities) do
+    if is_connector_or_ghost(entity) then
+      anchor_connector = entity
       break
     end
   end
