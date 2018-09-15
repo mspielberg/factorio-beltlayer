@@ -84,7 +84,7 @@ end
 
 local function transfer(self, from, to)
   local smallest_stack_size
-  local items_to_buffer = self.items_per_tick * UPDATE_INTERVAL * 2
+  local items_to_buffer = math.floor(self.items_per_tick * UPDATE_INTERVAL * 1.5)
   local items_to_transfer = items_to_buffer - to.get_item_count()
   if items_to_transfer <= 0 then
     for i=1,#to do
@@ -129,12 +129,13 @@ local function transfer(self, from, to)
 end
 
 local function set_buffer_limit(self, from_inventory, stack_size)
-  local ticks_per_stack = stack_size / self.items_per_tick
-  local stacks_per_update = math.ceil(UPDATE_INTERVAL / ticks_per_stack)
-  from_inventory.setbar(stacks_per_update * 2)
+  local items_to_buffer = self.items_per_tick * UPDATE_INTERVAL
+  local stacks_to_buffer = math.ceil(items_to_buffer / stack_size)
+  from_inventory.setbar(stacks_to_buffer + 1)
 end
 
 function Connector:update(tick)
+  if not self:valid() then return end
   tick = tick or game.tick
   if self.next_tick and tick < self.next_tick then
     return
@@ -149,13 +150,7 @@ function Connector:update(tick)
 
   local next_tick = game.tick + UPDATE_INTERVAL
   self.next_tick = next_tick
-  Scheduler.schedule(
-    next_tick,
-    function(t)
-      if self:valid() then
-        self:update(t)
-      end
-    end)
+  Scheduler.schedule(next_tick, function(t) self:update(t) end)
 end
 
 function M.on_tick(tick)
