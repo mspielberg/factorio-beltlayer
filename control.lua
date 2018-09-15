@@ -1,7 +1,6 @@
 local Blueprint = require "Blueprint"
 local Connector = require "Connector"
 local Editor = require "Editor"
-local Scheduler = require "lualib.Scheduler"
 
 local function on_init()
   Editor.on_init() -- init first to set up editor surface

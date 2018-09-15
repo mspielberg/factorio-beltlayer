@@ -1,5 +1,4 @@
 local Constants = require "Constants"
-local Editor = require "Editor"
 require "util"
 
 local SURFACE_NAME = Constants.SURFACE_NAME
@@ -188,15 +187,11 @@ function M.on_player_built_entity(event)
 
   local name = entity.name
   local position = entity.position
-  local direction = entity.direction
-  local belt_to_ground_type = entity.type == "underground-belt" and entity.belt_to_ground_type
   local force = entity.force
   if ghost_mined.tick == event.tick and
     ghost_mined.name == name and
     ghost_mined.position.x == position.x and
     ghost_mined.position.y == position.y and
-    -- ghost_mined.direction == direction and
-    -- ghost_mined.belt_to_ground_type == belt_to_ground_type and
     ghost_mined.force == force.name or force.get_friend(ghost_mined.force) then
       create_underground_entity(name, position, force, ghost_mined.direction, ghost_mined.belt_to_ground_type)
       entity.destroy()
