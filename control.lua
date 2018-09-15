@@ -1,6 +1,7 @@
 local Blueprint = require "Blueprint"
 local Connector = require "Connector"
 local Editor = require "Editor"
+local Scheduler = require "lualib.Scheduler"
 
 local function on_init()
   Editor.on_init() -- init first to set up editor surface
@@ -74,7 +75,7 @@ local event_handlers = {
   end,
 
   on_tick = function(event)
-    Connector.update(event.tick)
+    Connector.on_tick(event.tick)
   end
 }
 
@@ -88,3 +89,5 @@ script.on_event("beltlayer-toggle-editor-view", on_toggle_editor)
 for event_name, handler in pairs(event_handlers) do
   script.on_event(defines.events[event_name], handler)
 end
+script.on_event(defines.events.on_tick, nil)
+script.on_nth_tick(10, event_handlers.on_tick)

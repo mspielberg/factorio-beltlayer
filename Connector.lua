@@ -1,7 +1,9 @@
+local Scheduler = require "lualib.Scheduler"
+
 local M = {}
 
 local Connector = {}
-
+local UPDATE_INTERVAL = 300
 local all_connectors
 
 function M.on_init()
@@ -13,18 +15,25 @@ function M.on_load()
   all_connectors = global.all_connectors
   for _, connector in pairs(all_connectors) do
     M.restore(connector)
+    if connector.next_tick then
+      Scheduler.schedule(connector.next_tick, function(tick) connector:update(tick) end)
+    end
   end
 end
 
 function M.new(above_connector_entity, above_container, below_container)
   local self = {
+    unit_number = above_connector_entity.unit_number,
     above_loader = above_connector_entity,
     above_inv = above_container.get_inventory(defines.inventory.chest),
     below_inv = below_container.get_inventory(defines.inventory.chest),
     above_to_below = above_connector_entity.loader_type == "input",
+    items_per_tick = above_connector_entity.prototype.belt_speed * 32 * 2 / 9,
+    next_tick = nil,
   }
-  all_connectors[above_connector_entity.unit_number] = self
-  return M.restore(self)
+  all_connectors[self.unit_number] = self
+  self = M.restore(self)
+  self:update()
 end
 
 function M.restore(self)
@@ -36,13 +45,26 @@ function M.for_entity(above_connector_entity)
 end
 
 function Connector:valid()
-  return self.above_inv and self.above_inv.valid and self.below_inv and self.below_inv.valid
+  return self.above_loader and self.above_loader.valid and
+    self.above_inv and self.above_inv.valid and
+    self.below_inv and self.below_inv.valid
 end
 
 function Connector:rotate()
-  if self.above_loader and self.above_loader.valid then
-    self.above_to_below = self.above_loader.loader_type == "input"
+  if not self:valid() then return end
+  self.above_to_below = self.above_loader.loader_type == "input"
+  self.above_inv.setbar()
+  self.below_inv.setbar()
+  self.stack_size = nil
+  self.next_tick = nil
+  self:update()
+end
+
+local function from_to_inventories(self)
+  if self.above_to_below then
+    return self.above_inv, self.below_inv
   end
+  return self.below_inv, self.above_inv
 end
 
 local function transfer_special(from, to, name)
@@ -60,39 +82,84 @@ local function transfer_special(from, to, name)
   end
 end
 
-function Connector:transfer()
-  local from, to = self.above_inv, self.below_inv
-  if not self.above_to_below then
-    from, to = to, from
+local function transfer(self, from, to)
+  local smallest_stack_size
+  local items_to_buffer = self.items_per_tick * UPDATE_INTERVAL * 2
+  local items_to_transfer = items_to_buffer - to.get_item_count()
+  if items_to_transfer <= 0 then
+    for i=1,#to do
+      if to[i].valid_for_read then
+        return to[i].prototype.stack_size
+      end
+    end
+    -- should be unreachable
+    error("no room to transfer, but also nothing in destination buffer")
   end
+
   for name, count in pairs(from.get_contents()) do
+    if count > items_to_transfer then
+      count = items_to_transfer
+    end
+
     local proto = game.item_prototypes[name]
+    local stack_size = proto.stack_size
+    if not smallest_stack_size or stack_size < smallest_stack_size then
+      smallest_stack_size = stack_size
+    end
+
     if proto.type ~= "item" then
       transfer_special(from, to, name)
+      items_to_transfer = items_to_transfer - 1
     else
       local inserted = to.insert{name = name, count = count}
       if inserted == 0 then
         -- all full
-        return
+        return smallest_stack_size
       end
       from.remove{name = name, count = inserted}
+      items_to_transfer = items_to_transfer - inserted
+    end
+
+    if items_to_transfer <= 0 then
+      return smallest_stack_size or 50
     end
   end
+
+  return smallest_stack_size or 50
 end
 
-function M.update()
-  local connector
-  global.connector_iter, connector = next(all_connectors, global.connector_iter)
-  if not connector then
-    global.connector_iter, connector = next(all_connectors, global.connector_iter)
+local function set_buffer_limit(self, from_inventory, stack_size)
+  local ticks_per_stack = stack_size / self.items_per_tick
+  local stacks_per_update = math.ceil(UPDATE_INTERVAL / ticks_per_stack)
+  from_inventory.setbar(stacks_per_update * 2)
+end
+
+function Connector:update(tick)
+  tick = tick or game.tick
+  if self.next_tick and tick < self.next_tick then
+    return
   end
-  if connector then
-    if connector:valid() then
-      connector:transfer()
-    else
-      all_connectors[global.connector_iter] = nil
-    end
+
+  local from, to = from_to_inventories(self)
+  local stack_size = transfer(self, from, to)
+  if not self.stack_size or self.stack_size ~= stack_size then
+    self.stack_size = stack_size
+    set_buffer_limit(self, from, stack_size)
   end
+
+  local next_tick = game.tick + UPDATE_INTERVAL
+  self.next_tick = next_tick
+  Scheduler.schedule(
+    next_tick,
+    function(t)
+      if self:valid() then
+        self:update(t)
+      end
+    end)
+end
+
+function M.on_tick(tick)
+  Scheduler.on_tick(tick)
 end
 
 return M
