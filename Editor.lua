@@ -50,6 +50,16 @@ local valid_editor_types = {
   ["underground-belt"] = true,
 }
 
+local function is_stack_valid_for_editor(stack)
+  if stack.valid_for_read then
+    local place_result = stack.prototype.place_result
+    if place_result and valid_editor_types[place_result.type] then
+      return true
+    end
+  end
+  return false
+end
+
 local function get_player_editor_stacks(player)
   local stacks = {}
   for _, inventory_index in ipairs{defines.inventory.player_quickbar, defines.inventory.player_main} do
@@ -57,11 +67,8 @@ local function get_player_editor_stacks(player)
     if inventory then
       for i=1,#inventory do
         local stack = inventory[i]
-        if stack.valid_for_read then
-          local place_result = stack.prototype.place_result
-          if place_result and valid_editor_types[place_result.type] then
-            stacks[#stacks+1] = {name = stack.name, count = stack.count}
-          end
+        if is_stack_valid_for_editor(stack) then
+          stacks[#stacks+1] = {name = stack.name, count = stack.count}
         end
       end
     end
@@ -268,6 +275,9 @@ local function return_to_character_inventory(player_index, character, buffer)
           character.position,
           {name = stack.name, count = stack.count - inserted})
         stack.count = inserted
+      end
+      if not is_stack_valid_for_editor(stack) then
+        stack.clear()
       end
     end
   end
