@@ -2,7 +2,11 @@
 
 Ever wanted your underground belts to turn corners?
 
+![corners](resources/step5.png)
+
 Ever wanted to run underground belts long distances without periodically popping up above ground?
+
+![long underground](resources/long.png)
 
 Ever wondered why underground belts cost the same whether you run them under one tile or their full length?
 
@@ -12,10 +16,21 @@ If the answer to any of these questions is yes, then you need Beltlayer.
 
 1. Place down two Underground belt connectors of the desired belt speed, one at the entrance and one at the exit. Connectors are researched at the same time as the normal underground belts of the same speed and use the same recipe. You can use any rotation for these connectors.
 1. Change the connectors between input and output mode with the rotation key (normally R).
+
+    ![step 2](resources/step1.png)
+
 1. As the description for the connector indicates, press CONTROL+B (rebindable) to show the editor interface. You will see the underground endpoints of the two connectors you placed. The editor interface carries over all passive belt entities (belts and normal underground belts; no splitters or loaders) that were in your inventory.
+
+    ![step 3](resources/step3.png)
+
 1. Place belts in the glorious freedom of the underground between the two connectors, using the belt mechanics you are already familiar with.
+
+    ![step 4](resources/step4.png)
+
 1. Press CONTROL + B again to return to your character in the overworld.
 1. Profit!
+
+    ![step 5](resources/step5.png)
 
 # How it works
 
@@ -59,11 +74,11 @@ Each underground belt connector is a pair of loaders, one on the surface and one
 
 # FAQ
 
-> What's with the name of the mod?
+## What's with the name of the mod?
 
 A pipelayer is a person who installs ("lays down") pipes in underground areas. It is also a reference to the separate underground layer where the belts are routed.
 
-> Isn't this a little bit cheaty?
+## Isn't this a little bit cheaty?
 
 Yes, it absolutely is! The straight-line and length limitations of standard underground belts are part of Factorio's design challenge. Overuse of this mod may result in an unintended shortage of spaghetti in your factory.
 
