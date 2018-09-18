@@ -75,7 +75,11 @@ local event_handlers = {
 
   on_tick = function(event)
     Connector.on_tick(event.tick)
-  end
+  end,
+
+  on_runtime_mod_setting_changed = function(event)
+    Connector.on_runtime_mod_setting_changed(event.player_index, event.setting, event.setting_type)
+  end,
 }
 
 local function on_toggle_editor(event)

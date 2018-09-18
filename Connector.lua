@@ -3,7 +3,7 @@ local Scheduler = require "lualib.Scheduler"
 local M = {}
 
 local Connector = {}
-local UPDATE_INTERVAL = 300
+local update_interval = 300
 local all_connectors
 
 function M.on_init()
@@ -13,6 +13,7 @@ end
 
 function M.on_load()
   all_connectors = global.all_connectors
+  update_interval = settings.global["beltlayer-buffer-duration"].value
   for _, connector in pairs(all_connectors) do
     M.restore(connector)
     if connector.next_tick then
@@ -42,6 +43,12 @@ end
 
 function M.for_entity(above_connector_entity)
   return all_connectors[above_connector_entity.unit_number]
+end
+
+function M.on_runtime_mod_setting_changed(_, setting, _)
+  if setting == "beltlayer-buffer-duration" then
+    update_interval = settings.global[setting].value
+  end
 end
 
 function Connector:valid()
@@ -84,7 +91,7 @@ end
 
 local function transfer(self, from, to)
   local smallest_stack_size
-  local items_to_buffer = math.floor(self.items_per_tick * UPDATE_INTERVAL * 1.5)
+  local items_to_buffer = math.floor(self.items_per_tick * update_interval * 1.5)
   local items_to_transfer = items_to_buffer - to.get_item_count()
   if items_to_transfer <= 0 then
     for i=1,#to do
@@ -129,7 +136,7 @@ local function transfer(self, from, to)
 end
 
 local function set_buffer_limit(self, from_inventory, stack_size)
-  local items_to_buffer = self.items_per_tick * UPDATE_INTERVAL
+  local items_to_buffer = self.items_per_tick * update_interval
   local stacks_to_buffer = math.ceil(items_to_buffer / stack_size)
   from_inventory.setbar(stacks_to_buffer + 1)
 end
@@ -148,7 +155,7 @@ function Connector:update(tick)
     set_buffer_limit(self, from, stack_size)
   end
 
-  local next_tick = game.tick + UPDATE_INTERVAL
+  local next_tick = game.tick + update_interval
   self.next_tick = next_tick
   Scheduler.schedule(next_tick, function(t) self:update(t) end)
 end

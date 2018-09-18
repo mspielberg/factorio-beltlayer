@@ -27,9 +27,11 @@ Each underground belt connector is a pair of loaders, one on the surface and one
     * https://forums.factorio.com/viewtopic.php?t=61865
     * https://forums.factorio.com/viewtopic.php?t=61442
 
-1. If your belts are not full, you will clearly be able to see the bursts when items are transferred from one layer to another, with a 50% saturated belt becoming alternately fully saturated and empty.
+1. If your belts are not full, you will clearly be able to see the bursts when items are transferred from one surface to the other, with a 50% saturated belt becoming alternately fully saturated and empty.
 
 1. Connectors buffer quite a lot of items to allow multiple stacks to be transferred at once. When running with saturated belts, you will notice some strange gaps in belt flow when these buffers are being filled, but after a few update cycles the flow will stabilize.
+
+1. Mining connectors, or mining belts from the editor interface, puts mined items into your character's inventory. If there is insufficient room, they will be spilled on the ground at your character's feet.
 
 1. Connectors can only be placed on the main overworld map. No, you can't use these in space, Factorissimo buildings, or any other custom surfaces that may be added by other mods.
 
@@ -63,6 +65,6 @@ A pipelayer is a person who installs ("lays down") pipes in underground areas. I
 
 > Isn't this a little bit cheaty?
 
-Yes, it absolutely is! The straight-line and length limitations of standard underground belts are part of Factorio's design challenge, and overuse of this mod may result in an unintended shortage of spaghetti in your factory.
+Yes, it absolutely is! The straight-line and length limitations of standard underground belts are part of Factorio's design challenge. Overuse of this mod may result in an unintended shortage of spaghetti in your factory.
 
 On the other hand, you still have to move items on the surface to split, balance, and route items into and out of assembling machines, so the potentional for abuse is somewhat limited. Using this mod also introduces a new layer of complexity, where keeping track of where items are routed is no longer obvious just from looking at the surface. If you're not careful, you can make your own factory layout very confusing to navigate.

@@ -8,9 +8,9 @@ data:extend{
 
   {
     type = "int-setting",
-    name = "beltlayer-connector-capacity",
-    setting_type = "startup",
-    minimum_value = 1,
-    default_value = 10,
+    name = "beltlayer-buffer-duration",
+    setting_type = "runtime-global",
+    minimum_value = 30,
+    default_value = 300,
   },
 }

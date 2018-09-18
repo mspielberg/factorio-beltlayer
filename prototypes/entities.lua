@@ -1,7 +1,5 @@
 require "util"
 
-local Constants = require 'Constants'
-
 local empty_sprite = {
   filename = "__core__/graphics/empty.png",
   width = 0,
@@ -58,7 +56,7 @@ data:extend{
     collision_box = {{-0.1, -0.1}, {0.1, 0.1}},
     collision_mask = {},
     flags = {"player-creation", "hide-alt-info", "not-blueprintable", "not-deconstructable"},
-    inventory_size = Constants.CONNECTOR_CAPACITY,
+    inventory_size = 10,
     picture = empty_sprite,
   }
 }
