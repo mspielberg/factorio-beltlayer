@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.1.1
+Date: 18.09.2018
+  Changes:
+    - Reduced recipe cost to match 1 underground belt.
+  Bugfixes:
+    - Added migration to enable connector recipes on existing games
+---------------------------------------------------------------------------------------------------
 Version: 0.1.0 - First public release
 Date: 18.09.2018
   Major Features:
