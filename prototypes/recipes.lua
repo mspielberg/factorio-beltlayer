@@ -32,6 +32,13 @@ local function make_recipe(proto, base_result)
           end
         end
       end
+      for _, ingredient in ipairs(root.ingredients) do
+        if ingredient.amount then
+          ingredient.amount = math.ceil(ingredient.amount / 2)
+        elseif ingredient[2] then
+          ingredient[2] = math.ceil(ingredient[2] / 2)
+        end
+      end
     end
   end
 
