@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.2
-Date: 
+Date: 19.09.2018
   Minor Features:
     - Increase maximum buffer size to handle extremely fast belts. (https://mods.factorio.com/mod/beltlayer/discussion/5ba2573d4c9ce0000b78835a)
   Bugfixes:
