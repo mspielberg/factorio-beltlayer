@@ -66,7 +66,7 @@ Each underground belt connector is a pair of loaders, one on the surface and one
 
 ## [Subterra](https://mods.factorio.com/mod/subterra)
 
-* Subterra allows players and items to be transferred through the ground, as well as items.
+* Subterra allows players and fluids to be transferred through the ground, as well as items.
 * Subterra allows splitters, assemblers, and complete subterranean bases.
 * Subterra preserves lane-identity for belts.
 * Beltlayer is substantially more UPS-efficient.

@@ -19,15 +19,16 @@ end
 local function make_recipe(proto, base_result)
   local recipe = util.table.deepcopy(proto)
   recipe.name = recipe.name.."-beltlayer-connector"
+  local connector_item = base_result.."-beltlayer-connector"
   recipe.result_count = 1
   for _, root in ipairs{recipe, recipe.normal, recipe.expensive} do
     if root then
       if root.result then
-        root.result = recipe.name
+        root.result = connector_item
       elseif root.results then
         for i, result in ipairs(root.results) do
           if result.name == base_result then
-            root.results[i].name = recipe.name
+            root.results[i].name = connector_item
             root.results[i].amount = 1
           end
         end
@@ -45,9 +46,12 @@ local function make_recipe(proto, base_result)
   return recipe
 end
 
+local new_recipes = {}
 for _, recipe in pairs(data.raw.recipe) do
   local underground_belt_result = find_underground_belt_result(recipe)
   if underground_belt_result then
-    data:extend{make_recipe(recipe, underground_belt_result)}
+    local connector_recipe = make_recipe(recipe, underground_belt_result)
+    new_recipes[#new_recipes+1] = connector_recipe
   end
 end
+data:extend(new_recipes)
