@@ -23,8 +23,17 @@ local function make_recipe(proto, base_result)
   recipe.result_count = 1
   for _, root in ipairs{recipe, recipe.normal, recipe.expensive} do
     if root then
-      if root.result then
+      root.icons = nil
+      root.icon = nil
+      root.icon_size = nil
+
+      if root.main_product == base_result then
+        root.main_product = connector_item
+      end
+
+      if root.result == base_result then
         root.result = connector_item
+        root.result_count = nil
       elseif root.results then
         for i, result in ipairs(root.results) do
           if result.name == base_result then
@@ -33,6 +42,7 @@ local function make_recipe(proto, base_result)
           end
         end
       end
+
       for _, ingredient in ipairs(root.ingredients) do
         if ingredient.amount then
           ingredient.amount = math.ceil(ingredient.amount / 2)

@@ -3,13 +3,14 @@ Version: 0.1.2
 Date: 
   Bugfixes:
     - Fixed recipes where the item name differs from the recipe name. (https://mods.factorio.com/mod/beltlayer/discussion/5ba240814c9ce0000a195182)
+    - Fixed recipes listing an underground belt as the main product. (https://mods.factorio.com/mod/beltlayer/discussion/5ba240814c9ce0000a195182)
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.1
 Date: 18.09.2018
   Changes:
     - Reduced recipe cost to match 1 underground belt.
   Bugfixes:
-    - Added migration to enable connector recipes on existing games
+    - Added migration to enable connector recipes on existing games.
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.0 - First public release
 Date: 18.09.2018
