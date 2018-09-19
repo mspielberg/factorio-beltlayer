@@ -6,6 +6,8 @@ Date:
   Bugfixes:
     - Fixed recipes where the item name differs from the recipe name. (https://mods.factorio.com/mod/beltlayer/discussion/5ba240814c9ce0000a195182)
     - Fixed recipes listing an underground belt as the main product. (https://mods.factorio.com/mod/beltlayer/discussion/5ba240814c9ce0000a195182)
+  Localization:
+    - Added Russian translation by John_TheCF. (https://mods.factorio.com/mod/beltlayer/discussion/5ba23e9cb814420009bb8717)
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.1
 Date: 18.09.2018
