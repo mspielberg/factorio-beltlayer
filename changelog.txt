@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.2
 Date: 
+  Minor Features:
+    - Increase maximum buffer size to handle extremely fast belts. (https://mods.factorio.com/mod/beltlayer/discussion/5ba2573d4c9ce0000b78835a)
   Bugfixes:
     - Fixed recipes where the item name differs from the recipe name. (https://mods.factorio.com/mod/beltlayer/discussion/5ba240814c9ce0000a195182)
     - Fixed recipes listing an underground belt as the main product. (https://mods.factorio.com/mod/beltlayer/discussion/5ba240814c9ce0000a195182)

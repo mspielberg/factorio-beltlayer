@@ -44,10 +44,17 @@ local function make_connector(ug)
   return loader
 end
 
+local fastest_belt_speed = 0
 for _, ug in pairs(data.raw["underground-belt"]) do
+  if ug.speed > fastest_belt_speed then fastest_belt_speed = ug.speed end
   local loader = make_connector(ug)
   data:extend{loader}
 end
+
+local max_items_per_tick = fastest_belt_speed * 2 / (9 / 32)
+local max_stacks_per_tick = max_items_per_tick / 50
+local max_stacks_per_update = max_stacks_per_tick * 60 * 5
+log("projected max stacks per update: "..max_stacks_per_update)
 
 data:extend{
   {
@@ -56,7 +63,7 @@ data:extend{
     collision_box = {{-0.1, -0.1}, {0.1, 0.1}},
     collision_mask = {},
     flags = {"player-creation", "hide-alt-info", "not-blueprintable", "not-deconstructable"},
-    inventory_size = 10,
+    inventory_size = max_stacks_per_update * 2,
     picture = empty_sprite,
   }
 }
