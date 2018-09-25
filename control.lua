@@ -16,8 +16,13 @@ end
 
 local event_handlers = {
   on_built_entity = function(event)
-    Blueprint.on_player_built_entity(event)
-    Editor.on_player_built_entity(event)
+    if event.mod_name and event.mod_name ~= "upgrade-planner" then
+      Blueprint.on_robot_built_entity(nil, event.created_entity, event.stack)
+      Editor.on_robot_built_entity(nil, event.created_entity, event.stack)
+    else
+      Blueprint.on_player_built_entity(event)
+      Editor.on_player_built_entity(event)
+    end
   end,
 
   on_robot_built_entity = function(event)
