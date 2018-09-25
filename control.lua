@@ -32,6 +32,10 @@ local event_handlers = {
     Blueprint.on_pre_player_mined_item(event)
   end,
 
+  on_player_mined_item = function(event)
+    Editor.on_player_mined_item(event)
+  end,
+
   on_player_mined_entity = function(event)
     Editor.on_player_mined_entity(event)
   end,

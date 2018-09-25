@@ -192,6 +192,10 @@ local function built_surface_connector(player, entity)
   Connector.new(entity, above_container, below_container)
 end
 
+local function item_for_entity(entity)
+  return next(entity.prototype.items_to_place_this)
+end
+
 local function player_built_underground_entity(player_index, stack)
   local character = player_state[player_index].character
   if character then
@@ -208,7 +212,13 @@ function M.on_player_built_entity(event)
   local player = game.players[player_index]
   local entity = event.created_entity
   if not entity.valid or entity.name == "entity-ghost" then return end
+  local stack = event.stack
   local surface = entity.surface
+
+  if event.mod_name == "upgrade-planner" then
+    -- work around https://github.com/Klonan/upgrade-planner/issues/10
+    stack = {name = item_for_entity(entity), count = 1}
+  end
 
   if is_connector(entity) then
     if surface.name == "nauvis" then
@@ -217,7 +227,7 @@ function M.on_player_built_entity(event)
       abort_player_build(player, entity, {"beltlayer-error.bad-surface-for-connector"})
     end
   elseif surface == editor_surface then
-    player_built_underground_entity(player_index, event.stack)
+    player_built_underground_entity(player_index, stack)
   end
 end
 
@@ -263,20 +273,28 @@ local function mined_surface_connector(entity, buffer)
   underground_connector.destroy()
 end
 
-local function return_to_character_inventory(player_index, character, buffer)
+local function return_to_character_or_spill(player, character, stack)
+  local inserted = character.insert(stack)
+  if inserted < stack.count then
+    player.print({"inventory-restriction.player-inventory-full", stack.prototype.localised_name})
+    character.surface.spill_item_stack(
+      character.position,
+      {name = stack.name, count = stack.count - inserted})
+  end
+  return inserted
+end
+
+local function return_buffer_to_character(player_index, character, buffer)
   local player = game.players[player_index]
   for i=1,#buffer do
     local stack = buffer[i]
     if stack.valid_for_read then
-      local inserted = character.insert(stack)
-      if inserted < stack.count then
-        player.print({"inventory-restriction.player-inventory-full", stack.prototype.localised_name})
-        character.surface.spill_item_stack(
-          character.position,
-          {name = stack.name, count = stack.count - inserted})
+      local inserted = return_to_character_or_spill(player, character, stack)
+      if is_stack_valid_for_editor(stack) then
+        -- match editor player inventory to character inventory
         stack.count = inserted
-      end
-      if not is_stack_valid_for_editor(stack) then
+      else
+        -- belt contents; don't allow placement in editor
         stack.clear()
       end
     end
@@ -286,7 +304,23 @@ end
 local function player_mined_from_editor(event)
   local character = player_state[event.player_index].character
   if character then
-    return_to_character_inventory(event.player_index, character, event.buffer)
+    return_buffer_to_character(event.player_index, character, event.buffer)
+  end
+end
+
+function M.on_player_mined_item(event)
+  if event.mod_name == "upgrade-planner" then
+    -- upgrade-planner won't insert to character inventory
+    local player = game.players[event.player_index]
+    local character = player_state[event.player_index].character
+    if character then
+      local count = event.item_stack.count
+      local inserted = return_to_character_or_spill(player, character, event.item_stack)
+      if inserted < count then
+        -- try to match editor inventory to character inventory
+        player.remove_item{name = event.item_stack.name, count = count - inserted}
+      end
+    end
   end
 end
 
