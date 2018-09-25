@@ -16,12 +16,8 @@ end
 
 local event_handlers = {
   on_built_entity = function(event)
-    if event.mod_name then
-      Editor.on_robot_built_entity(event)
-    else
-      Blueprint.on_player_built_entity(event)
-      Editor.on_player_built_entity(event)
-    end
+    Blueprint.on_player_built_entity(event)
+    Editor.on_player_built_entity(event)
   end,
 
   on_robot_built_entity = function(event)
