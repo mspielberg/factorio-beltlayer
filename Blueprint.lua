@@ -218,8 +218,25 @@ local function player_mined_connector_ghost(connector_ghost)
   end
 end
 
+local function on_player_mined_surface_entity(entity)
+  local name = nonproxy_name(entity.name)
+  if not name then return end
+  local counterpart = underground_counterpart(entity)
+  if counterpart then
+    counterpart.destroy()
+  end
+end
+
+local function on_player_mined_underground_entity(entity)
+  local counterpart = surface_counterpart(entity)
+  if counterpart then
+    counterpart.destroy()
+  end
+end
+
 function M.on_pre_player_mined_item(event)
   local entity = event.entity
+  if not entity.valid then return end
   if entity.name == "entity-ghost" then
     local ghost_name = entity.ghost_name
     local name = nonproxy_name(ghost_name)
@@ -237,28 +254,7 @@ function M.on_pre_player_mined_item(event)
     elseif ghost_name == "beltlayer-connector" then
       return player_mined_connector_ghost(entity)
     end
-  end
-end
-
-local function on_player_mined_surface_entity(entity)
-  local name = nonproxy_name(entity.name)
-  if not name then return end
-  local counterpart = underground_counterpart(entity)
-  if counterpart then
-    counterpart.destroy()
-  end
-end
-
-local function on_player_mined_underground_entity(entity)
-  local counterpart = surface_counterpart(entity)
-  if counterpart then
-    counterpart.destroy()
-  end
-end
-
-function M.on_player_mined_entity(_, entity, _)
-  if not entity.valid then return end
-  if entity.surface == editor_surface then
+  elseif entity.surface == editor_surface then
     return on_player_mined_underground_entity(entity)
   elseif entity.surface == game.surfaces.nauvis then
     return on_player_mined_surface_entity(entity)
