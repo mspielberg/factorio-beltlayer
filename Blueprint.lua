@@ -355,7 +355,7 @@ local function on_player_deconstructed_surface_area(player, area, filter)
 end
 
 local function on_player_deconstructed_underground_area(player, area, filter)
-  local underground_entities = order_underground_deconstruction(player, area)
+  local underground_entities = order_underground_deconstruction(player, area, filter)
   for _, entity in ipairs(underground_entities) do
     if filter(entity) and is_connector(entity.name) then
       local counterpart = surface_counterpart(entity)
