@@ -46,9 +46,11 @@ end
 
 local fastest_belt_speed = 0
 for _, ug in pairs(data.raw["underground-belt"]) do
-  if ug.speed > fastest_belt_speed then fastest_belt_speed = ug.speed end
-  local loader = make_connector(ug)
-  data:extend{loader}
+  if ug.minable then
+    if ug.speed > fastest_belt_speed then fastest_belt_speed = ug.speed end
+    local loader = make_connector(ug)
+    data:extend{loader}
+  end
 end
 
 local max_items_per_tick = fastest_belt_speed * 2 / (9 / 32)
