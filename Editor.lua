@@ -13,31 +13,42 @@ if Constants.DEBUG_ENABLED then
   debug = log
 end
 
+local function editor_autoplace_control()
+  for control in pairs(game.autoplace_control_prototypes) do
+    if control:find("dirt") then
+      return control
+    end
+  end
+  -- pick one at random
+  return next(game.autoplace_control_prototypes)
+end
+
 function M.on_init()
-    local surface = game.create_surface(
-      SURFACE_NAME,
-      {
-        starting_area = "none",
-        water = "none",
-        cliff_settings = { cliff_elevation_0 = 1024 },
-        default_enable_all_autoplace_controls = false,
-        autoplace_controls = {
-          dirt = {
-            frequency = "very-low",
-            size = "very-high",
-          },
+  local autoplace_control = editor_autoplace_control()
+  local surface = game.create_surface(
+    SURFACE_NAME,
+    {
+      starting_area = "none",
+      water = "none",
+      cliff_settings = { cliff_elevation_0 = 1024 },
+      default_enable_all_autoplace_controls = false,
+      autoplace_controls = {
+        [autoplace_control] = {
+          frequency = "very-low",
+          size = "very-high",
         },
-        autoplace_settings = {
-          decorative = { treat_missing_as_default = false },
-          entity = { treat_missing_as_default = false },
-        },
-      }
-    )
-    surface.daytime = 0.35
-    surface.freeze_daytime = true
-    global.editor_surface = surface
-    global.player_state = {}
-    M.on_load()
+      },
+      autoplace_settings = {
+        decorative = { treat_missing_as_default = false },
+        entity = { treat_missing_as_default = false },
+      },
+    }
+  )
+  surface.daytime = 0.35
+  surface.freeze_daytime = true
+  global.editor_surface = surface
+  global.player_state = {}
+  M.on_load()
 end
 
 function M.on_load()

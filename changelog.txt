@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.1.5
+Date: 26.09.2018
+  Bugfixes:
+    - Fixed crash when dirt terrain type is not available, e.g. alien-biomes. (https://mods.factorio.com/mod/beltlayer/discussion/5bb33bdacf62c8000be5a4e3)
+---------------------------------------------------------------------------------------------------
 Version: 0.1.4
 Date: 26.09.2018
   Bugfixes:
