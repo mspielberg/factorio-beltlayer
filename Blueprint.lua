@@ -79,6 +79,42 @@ local function find_in_area(surface, area, args)
   end
 end
 
+local function stack_from_items_to_place(entity)
+  local product = next(entity.prototype.items_to_place_this)
+  return { name = product, count = 1 }
+end
+
+local function abort_player_build(player, entity, message)
+  player.insert(stack_from_items_to_place(entity))
+  entity.surface.create_entity{
+    name = "flying-text",
+    position = entity.position,
+    text = message,
+  }
+  entity.destroy()
+end
+
+
+local function abort_robot_build(entity, message)
+  local surface = entity.surface
+  local position = entity.position
+  local force = entity.force
+  local stack = stack_from_items_to_place(entity)
+  surface.create_entity{
+    name = "flying-text",
+    position = position,
+    text = message,
+  }
+  entity.destroy()
+  local spilled_stack = surface.create_entity{
+    name = "item-on-ground",
+    force = force,
+    position = position,
+    stack = stack,
+  }
+  spilled_stack.order_deconstruction(force)
+end
+
 local function nonproxy_name(name)
   return name:match("^beltlayer%-bpproxy%-(.*)$")
 end
@@ -145,7 +181,6 @@ local function on_player_built_ghost(ghost)
   local name = nonproxy_name(ghost.ghost_name)
   if name then
     if editor_surface.find_entity("entity-ghost", ghost.position) then
-      game.print("found underground ghost at "..ghost.position.x..","..ghost.position.y)
       ghost.destroy()
       return
     end
@@ -170,15 +205,19 @@ local function create_underground_entity(name, position, force, direction, belt_
     direction = direction,
     type = belt_to_ground_type,
   }
-  game.surfaces.nauvis.create_entity{
-    name="flying-text",
-    position=position,
-    text={"beltlayer-message.created-underground", underground_entity.localised_name},
-  }
+  if underground_entity then
+    game.surfaces.nauvis.create_entity{
+      name="flying-text",
+      position=position,
+      text={"beltlayer-message.created-underground", underground_entity.localised_name},
+    }
+  end
+  return underground_entity
 end
 
 local ghost_mined
 function M.on_player_built_entity(event)
+  local player = game.players[event.player_index]
   local entity = event.created_entity
   if entity.name == "entity-ghost" then
     return on_player_built_ghost(entity)
@@ -195,8 +234,14 @@ function M.on_player_built_entity(event)
     ghost_mined.position.x == position.x and
     ghost_mined.position.y == position.y and
     ghost_mined.force == force.name or force.get_friend(ghost_mined.force) then
-      create_underground_entity(name, position, force, ghost_mined.direction, ghost_mined.belt_to_ground_type)
-      entity.destroy()
+      local direction = ghost_mined.direction
+      local type = ghost_mined.belt_to_ground_type
+      local underground_entity = create_underground_entity(name, position, force, direction, type)
+      if underground_entity then
+        entity.destroy()
+      else
+        abort_player_build(player, entity, {"beltlayer-error.underground-obstructed"})
+      end
   end
 end
 
@@ -209,8 +254,17 @@ function M.on_robot_built_entity(_, entity, _)
   if entity.type == "underground-belt" then
     belt_to_ground_type = entity.belt_to_ground_type
   end
-  create_underground_entity(name, entity.position, entity.force, entity.direction, belt_to_ground_type)
-  entity.destroy()
+  local underground_entity = create_underground_entity(
+    name,
+    entity.position,
+    entity.force,
+    entity.direction,
+    belt_to_ground_type)
+  if underground_entity then
+    entity.destroy()
+  else
+    abort_robot_build(entity, {"beltlayer-error.underground-obstructed"})
+  end
 end
 
 local function player_mined_connector_ghost(connector_ghost)
