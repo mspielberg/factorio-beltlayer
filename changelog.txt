@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.1.6
+Date: 17.10.2018
+  Changes:
+    - Placing an underground belt will remove any ghost on the surface for an underground belt.
+  Bugfixes:
+    - Fix not being able to place ghosts of underground belts in certain cases.
+    - Fix crash when reviving a surface ghost of an underground belt, but the underground is already occupied. (https://mods.factorio.com/mod/beltlayer/discussion/5bc3bf0efdd6480009122c03)
+    - Items picked up from belts while in the editor view that should not be placeable in the editor will not show in the editor inventory. (https://mods.factorio.com/mod/beltlayer/discussion/5bc75ffe5b1d0a000be0884e)
+---------------------------------------------------------------------------------------------------
 Version: 0.1.5
 Date: 02.10.2018
   Bugfixes:
