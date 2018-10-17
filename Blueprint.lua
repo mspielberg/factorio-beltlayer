@@ -63,6 +63,7 @@ local function find_in_area(surface, area, args)
   local position
   if area.left_top.x >= area.right_bottom.x or area.left_top.y >= area.right_bottom.y then
     position = area.left_top
+    area = nil
   end
   if args then
     local find_args = util.table.deepcopy(args)
@@ -119,8 +120,8 @@ local function on_player_built_bpproxy_ghost(ghost, name)
     create_entity_args.type = ghost.belt_to_ground_type
   end
 
-  if editor_surface.can_place_entity(create_entity_args) then
-    local editor_ghost = editor_surface.create_entity(create_entity_args)
+  local editor_ghost = editor_surface.create_entity(create_entity_args)
+  if editor_ghost then
     editor_ghost.last_user = ghost.last_user
     if is_connector(name) then
       ghost.destroy()
@@ -144,6 +145,7 @@ local function on_player_built_ghost(ghost)
   local name = nonproxy_name(ghost.ghost_name)
   if name then
     if editor_surface.find_entity("entity-ghost", ghost.position) then
+      game.print("found underground ghost at "..ghost.position.x..","..ghost.position.y)
       ghost.destroy()
       return
     end

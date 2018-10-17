@@ -167,14 +167,15 @@ local function built_surface_connector(player, entity)
     entity.loader_type = opposite_type(loader_type)
   end
 
-  local create_args = {
+  local underground_connector = editor_surface.create_entity{
     name = entity.name,
     position = position,
     direction = direction,
     type = loader_type,
     force = force,
   }
-  if not editor_surface.can_place_entity(create_args) then
+
+  if not underground_connector then
     if player then
       abort_player_build(player, entity, {"beltlayer-error.underground-obstructed"})
     else
@@ -183,7 +184,6 @@ local function built_surface_connector(player, entity)
     return
   end
 
-  local underground_connector = editor_surface.create_entity(create_args)
   underground_connector.minable = false
 
   -- create buffer containers
