@@ -216,20 +216,12 @@ local function create_underground_entity(name, position, force, direction, belt_
 end
 
 local ghost_mined
-function M.on_player_built_entity(event)
-  local player = game.players[event.player_index]
-  local entity = event.created_entity
-  if entity.name == "entity-ghost" then
-    return on_player_built_ghost(entity)
-  end
-
-  if entity.surface ~= game.surfaces.nauvis then return end
+local function on_player_built_surface_entity(player, entity)
   if not ghost_mined then return end
-
   local name = entity.name
   local position = entity.position
   local force = entity.force
-  if ghost_mined.tick == event.tick and
+  if ghost_mined.tick == game.tick and
     ghost_mined.name == name and
     ghost_mined.position.x == position.x and
     ghost_mined.position.y == position.y and
@@ -242,6 +234,30 @@ function M.on_player_built_entity(event)
       else
         abort_player_build(player, entity, {"beltlayer-error.underground-obstructed"})
       end
+  end
+end
+
+local function on_player_built_underground_entity(_, entity)
+  local colliding_ghosts = find_in_area(game.surfaces.nauvis, entity.bounding_box, { name = "entity-ghost"})
+  for _, ghost in ipairs(colliding_ghosts) do
+    if nonproxy_name(ghost.ghost_name) then
+      -- bpproxy ghost on surface collides with new underground entity
+      ghost.destroy()
+    end
+  end
+end
+
+function M.on_player_built_entity(event)
+  local player = game.players[event.player_index]
+  local entity = event.created_entity
+  if entity.name == "entity-ghost" then
+    return on_player_built_ghost(entity)
+  end
+
+  if entity.surface == game.surfaces.nauvis then
+    return on_player_built_surface_entity(player, entity)
+  elseif entity.surface == editor_surface then
+    return on_player_built_underground_entity(player, entity)
   end
 end
 
