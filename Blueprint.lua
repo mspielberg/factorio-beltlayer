@@ -94,7 +94,6 @@ local function abort_player_build(player, entity, message)
   entity.destroy()
 end
 
-
 local function abort_robot_build(entity, message)
   local surface = entity.surface
   local position = entity.position
@@ -238,7 +237,7 @@ local function on_player_built_surface_entity(player, entity)
 end
 
 local function on_player_built_underground_entity(_, entity)
-  local colliding_ghosts = find_in_area(game.surfaces.nauvis, entity.bounding_box, { name = "entity-ghost"})
+  local colliding_ghosts = find_in_area(game.surfaces.nauvis, entity.bounding_box, {name = "entity-ghost"})
   for _, ghost in ipairs(colliding_ghosts) do
     if nonproxy_name(ghost.ghost_name) then
       -- bpproxy ghost on surface collides with new underground entity

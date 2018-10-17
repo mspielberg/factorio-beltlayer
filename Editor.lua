@@ -287,7 +287,7 @@ end
 local function return_to_character_or_spill(player, character, stack)
   local inserted = character.insert(stack)
   if inserted < stack.count then
-    player.print({"inventory-restriction.player-inventory-full", stack.prototype.localised_name})
+    player.print({"inventory-restriction.player-inventory-full", game.item_prototypes[stack.name].localised_name})
     character.surface.spill_item_stack(
       character.position,
       {name = stack.name, count = stack.count - inserted})
@@ -308,6 +308,22 @@ local function return_buffer_to_character(player_index, character, buffer)
         -- belt contents; don't allow placement in editor
         stack.clear()
       end
+    end
+  end
+end
+
+function M.on_picked_up_item(event)
+  local player = game.players[event.player_index]
+  if player.surface ~= editor_surface then return end
+  local character = player_state[event.player_index].character
+  if character then
+    local stack = event.item_stack
+    local inserted = return_to_character_or_spill(player, character, stack)
+    if is_stack_valid_for_editor(stack) then
+      -- remove excess that didn't fit in character inventory
+      player.remove_item{name = stack.name, count = stack.count - inserted}
+    else
+      player.remove_item(stack)
     end
   end
 end

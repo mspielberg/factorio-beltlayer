@@ -33,6 +33,10 @@ local event_handlers = {
     Editor.on_robot_built_entity(robot, entity, stack)
   end,
 
+  on_picked_up_item = function(event)
+    Editor.on_picked_up_item(event)
+  end,
+
   on_pre_player_mined_item = function(event)
     Blueprint.on_pre_player_mined_item(event)
   end,
