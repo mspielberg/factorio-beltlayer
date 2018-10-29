@@ -23,7 +23,7 @@ local function editor_autoplace_control()
   return next(game.autoplace_control_prototypes)
 end
 
-function M.on_init()
+local function create_editor_surface()
   local autoplace_control = editor_autoplace_control()
   local surface = game.create_surface(
     SURFACE_NAME,
@@ -47,6 +47,14 @@ function M.on_init()
   surface.daytime = 0.35
   surface.freeze_daytime = true
   global.editor_surface = surface
+end
+
+function M.on_init()
+  if game.surfaces[SURFACE_NAME] then
+    game.delete_surface(SURFACE_NAME)
+  else
+    create_editor_surface()
+  end
   global.player_state = {}
   M.on_load()
 end
@@ -54,6 +62,13 @@ end
 function M.on_load()
   editor_surface = global.editor_surface
   player_state = global.player_state
+end
+
+function M.on_surface_deleted(event)
+  if not game.surfaces[SURFACE_NAME] then
+    create_editor_surface()
+    editor_surface = global.editor_surface
+  end
 end
 
 local valid_editor_types = {

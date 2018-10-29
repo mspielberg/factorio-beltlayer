@@ -1,5 +1,10 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.6
+Date: XXXXX
+  Bugfixes:
+    - Reset underground when reinstalling to the same map.
+---------------------------------------------------------------------------------------------------
+Version: 0.1.6
 Date: 17.10.2018
   Changes:
     - Placing an underground belt will remove any ghost on the surface for an underground belt.

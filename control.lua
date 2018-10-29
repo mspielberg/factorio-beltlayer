@@ -81,6 +81,10 @@ local event_handlers = {
     Editor.on_entity_died(event)
   end,
 
+  on_surface_deleted = function(event)
+    Editor.on_surface_deleted(event)
+  end,
+
   on_tick = function(event)
     Connector.on_tick(event.tick)
   end,
