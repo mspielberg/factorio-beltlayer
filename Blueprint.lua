@@ -105,6 +105,8 @@ local function abort_robot_build(entity, message)
     text = message,
   }
   entity.destroy()
+  -- don't drop an item-on-ground on top of a belt entity
+  position = surface.find_non_colliding_position("transport-belt", position, 0, 0.5)
   local spilled_stack = surface.create_entity{
     name = "item-on-ground",
     force = force,
