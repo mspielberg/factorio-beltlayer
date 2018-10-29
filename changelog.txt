@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.1.8
+Date: 29.10.2018
+  Bugfixes:
+    - Fix handling of underground belt recipes that use results instead of result.
+    - Fix handling of underground belt recipes with normal & expensive variants (https://forums.factorio.com/viewtopic.php?f=190&t=62567#p384246).
+    - Fix handling of underground belt recipes that produce more or less than 2 items.
+---------------------------------------------------------------------------------------------------
 Version: 0.1.7
 Date: 28.10.2018
   Bugfixes:
