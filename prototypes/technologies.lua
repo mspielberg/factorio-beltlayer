@@ -7,8 +7,9 @@ local function find_underground_belt_result(recipe)
         end
       elseif root.results then
         for _, result in ipairs(root.results) do
-          if data.raw["underground-belt"][result.name] then
-            return root.result
+          local name = result.name or result[1]
+          if data.raw["underground-belt"][name] then
+            return name
           end
         end
       end
@@ -36,4 +37,4 @@ for _, tech in pairs(data.raw.technology) do
       end
     end
   end
-end
+enddd
