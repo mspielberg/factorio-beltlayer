@@ -373,18 +373,27 @@ local function create_entity_filter(tool)
   end
 end
 
+local function destroy_bpproxy_ghost(position)
+  local ghost = game.surfaces.nauvis.find_entity("entity-ghost", position)
+  if ghost and ghost.ghost_name:find("^beltlayer%-bpproxy%-") then
+    ghost.destroy()
+  end
+end
+
 local function order_underground_deconstruction(player, area, filter)
   local nauvis = game.surfaces.nauvis
-  local num_to_deconstruct = 0
   local underground_entities = find_in_area(editor_surface, area, {})
+  local to_deconstruct = {}
   for _, entity in ipairs(underground_entities) do
     if filter(entity) then
-      if is_connector(entity.name) then
+      if entity.name == "entity-ghost" then
+        destroy_bpproxy_ghost(entity.position)
+        entity.destroy()
+      elseif is_connector(entity.name) then
         entity.minable = true
         entity.order_deconstruction(entity.force)
         entity.minable = false
-      elseif entity.name == "entity-ghost" then
-        entity.destroy()
+        to_deconstruct[#to_deconstruct+1] = entity
       elseif entity.type == "transport-belt" or entity.type == "underground-belt" then
         local proxy = nauvis.create_entity{
           name = "beltlayer-bpproxy-"..entity.name,
@@ -395,11 +404,11 @@ local function order_underground_deconstruction(player, area, filter)
         proxy.destructible = false
         proxy.order_deconstruction(proxy.force, player)
         entity.order_deconstruction(entity.force)
-        num_to_deconstruct = num_to_deconstruct + 1
+        to_deconstruct[#to_deconstruct+1] = entity
       end
     end
   end
-  return underground_entities
+  return to_deconstruct
 end
 
 local function connector_in_area(surface, area)
@@ -422,7 +431,8 @@ local function on_player_deconstructed_surface_area(player, area, filter)
     return
   end
   local underground_entities = order_underground_deconstruction(player, area, filter)
-  if settings.get_player_settings(player)["beltlayer-deconstruction-warning"].value then
+  if next(underground_entities) and
+     settings.get_player_settings(player)["beltlayer-deconstruction-warning"].value then
     player.print({"beltlayer-message.marked-for-deconstruction", #underground_entities})
   end
 end
@@ -430,7 +440,7 @@ end
 local function on_player_deconstructed_underground_area(player, area, filter)
   local underground_entities = order_underground_deconstruction(player, area, filter)
   for _, entity in ipairs(underground_entities) do
-    if filter(entity) and is_connector(entity.name) then
+    if is_connector(entity.name) then
       local counterpart = surface_counterpart(entity)
       if counterpart then
         counterpart.order_deconstruction(counterpart.force)
