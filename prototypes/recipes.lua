@@ -20,7 +20,6 @@ local function make_recipe(proto, base_result)
   local recipe = util.table.deepcopy(proto)
   recipe.name = recipe.name.."-beltlayer-connector"
   local connector_item = base_result.."-beltlayer-connector"
-  recipe.result_count = 1
   for _, root in ipairs{recipe, recipe.normal, recipe.expensive} do
     if root then
       root.icons = nil
@@ -31,28 +30,36 @@ local function make_recipe(proto, base_result)
         root.main_product = connector_item
       end
 
+      local count
       if root.result == base_result then
         root.result = connector_item
+        count = root.result_count
         root.result_count = nil
       elseif root.results then
         for i, result in ipairs(root.results) do
           if result.name == base_result then
-            root.results[i].name = connector_item
-            root.results[i].amount = 1
+            result.name = connector_item
+            count = result.amount
+            result.amount = 1
           end
         end
       end
 
-      for _, ingredient in ipairs(root.ingredients) do
-        if ingredient.amount then
-          ingredient.amount = math.ceil(ingredient.amount / 2)
-        elseif ingredient[2] then
-          ingredient[2] = math.ceil(ingredient[2] / 2)
+      count = count or 1
+
+      if root.ingredients then
+        for _, ingredient in ipairs(root.ingredients) do
+          if ingredient.amount then
+            ingredient.amount = math.ceil(ingredient.amount / count)
+          elseif ingredient[2] then
+            ingredient[2] = math.ceil(ingredient[2] / count)
+          end
         end
       end
     end
   end
 
+  recipe.result_count = 1
   return recipe
 end
 
