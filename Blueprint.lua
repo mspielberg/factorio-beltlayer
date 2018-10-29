@@ -441,7 +441,7 @@ function M.on_player_deconstructed_area(player_index, area, _, alt)
   if alt then return end
   local player = game.players[player_index]
   local tool = player.cursor_stack
-  if not tool or not tool.is_deconstruction_item then return end
+  if not tool or not tool.valid_for_read or not tool.is_deconstruction_item then return end
   local filter = create_entity_filter(tool)
   if player.surface == game.surfaces.nauvis then
     return on_player_deconstructed_surface_area(player, area, filter)
