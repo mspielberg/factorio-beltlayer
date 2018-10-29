@@ -44,10 +44,14 @@ local function make_connector(ug)
   return loader
 end
 
+local fastest_belt_name = ""
 local fastest_belt_speed = 0
-for _, ug in pairs(data.raw["underground-belt"]) do
+for name, ug in pairs(data.raw["underground-belt"]) do
   if ug.minable then
-    if ug.speed > fastest_belt_speed then fastest_belt_speed = ug.speed end
+    if ug.speed > fastest_belt_speed then
+      fastest_belt_name = name
+      fastest_belt_speed = ug.speed
+    end
     local loader = make_connector(ug)
     data:extend{loader}
   end
@@ -56,6 +60,7 @@ end
 local max_items_per_tick = fastest_belt_speed * 2 / (9 / 32)
 local max_stacks_per_tick = max_items_per_tick / 50
 local max_stacks_per_update = max_stacks_per_tick * 60 * 5
+log("fastest belt is "..fastest_belt_name.." "..(max_items_per_tick * 60).." items/s")
 log("projected max stacks per update: "..max_stacks_per_update)
 
 data:extend{
