@@ -77,11 +77,17 @@ local valid_editor_types = {
 }
 
 local function is_stack_valid_for_editor(stack)
-  if stack.valid_for_read then
-    local place_result = stack.prototype.place_result
-    if place_result and valid_editor_types[place_result.type] then
-      return true
-    end
+  local item_prototype
+  if stack.valid and stack.valid_for_read then
+    item_prototype = stack.prototype
+  elseif not stack.valid then
+    item_prototype = game.item_prototypes[stack.name]
+  else
+    return false
+  end
+  local place_result = item_prototype.place_result
+  if place_result and valid_editor_types[place_result.type] then
+    return true
   end
   return false
 end
@@ -334,11 +340,11 @@ function M.on_picked_up_item(event)
   if character then
     local stack = event.item_stack
     local inserted = return_to_character_or_spill(player, character, stack)
-    if is_stack_valid_for_editor(stack) then
-      -- remove excess that didn't fit in character inventory
-      player.remove_item{name = stack.name, count = stack.count - inserted}
-    else
+    local excess = stack.count - inserted
+    if not is_stack_valid_for_editor(stack) then
       player.remove_item(stack)
+    elseif excess > 0 then
+      player.remove_item{name = stack.name, count = excess}
     end
   end
 end
