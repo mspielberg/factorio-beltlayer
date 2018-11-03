@@ -92,26 +92,33 @@ local function is_stack_valid_for_editor(stack)
   return false
 end
 
-local function get_player_editor_stacks(player)
-  local stacks = {}
-  for _, inventory_index in ipairs{defines.inventory.player_quickbar, defines.inventory.player_main} do
-    local inventory = player.get_inventory(inventory_index)
-    if inventory then
-      for i=1,#inventory do
-        local stack = inventory[i]
-        if is_stack_valid_for_editor(stack) then
-          stacks[#stacks+1] = {name = stack.name, count = stack.count}
-        end
+local function sync_player_inventory(character, player)
+  for name in pairs(valid_editor_types) do
+    local character_count = character.get_item_count(name)
+    local player_count = player.get_item_count(name)
+    if character_count > player_count then
+      player.insert{name = name, count = character_count - player_count}
+    elseif character_count < player_count then
+      player.remove_item{name = name, count = player_count - character_count}
+    end
+  end
+end
+
+local function sync_player_inventories()
+  for player_index, state in pairs(player_state) do
+    local character = state.character
+    if character then
+      local player = game.players[player_index]
+      if player.connected then
+        sync_player_inventory(character, player)
       end
     end
   end
-  return stacks
 end
 
 local function move_player_to_editor(player)
   local success = player.clean_cursor()
   if not success then return end
-  local editor_stacks = get_player_editor_stacks(player)
   local player_index = player.index
   player_state[player_index] = {
     position = player.position,
@@ -120,23 +127,14 @@ local function move_player_to_editor(player)
   }
   player.character = nil
   player.teleport(player.position, editor_surface)
-  if player_state[player_index].character then
-    for _, stack in ipairs(editor_stacks) do
-      player.insert(stack)
-    end
-  end
 end
 
 local function return_player_from_editor(player)
   local player_index = player.index
-  if player_state[player_index].character then
-    player.clean_cursor()
-    player.get_main_inventory().clear()
-    player.get_quickbar().clear()
-    player.teleport(player_state[player_index].position, player_state[player_index].surface)
-    player.character = player_state[player_index].character
-  else
-    player.teleport(player_state[player_index].position, player_state[player_index].surface)
+  local state = player_state[player_index]
+  player.teleport(state.position, state.surface)
+  if state.character then
+    player.character = state.character
   end
   player_state[player_index] = nil
 end
@@ -165,9 +163,8 @@ end
 local function opposite_type(loader_type)
   if loader_type == "input" then
     return "output"
-  else
-    return "input"
   end
+  return "input"
 end
 
 local function built_surface_connector(player, entity)
@@ -362,11 +359,13 @@ function M.on_player_mined_item(event)
     local player = game.players[event.player_index]
     local character = player_state[event.player_index].character
     if character then
-      local count = event.item_stack.count
-      local inserted = return_to_character_or_spill(player, character, event.item_stack)
-      if inserted < count then
+      local stack = event.item_stack
+      local count = stack.count
+      local inserted = return_to_character_or_spill(player, character, stack)
+      local excess = count - inserted
+      if excess > 0 then
         -- try to match editor inventory to character inventory
-        player.remove_item{name = event.item_stack.name, count = count - inserted}
+        player.remove_item{name = event.item_stack.name, count = excess}
       end
     end
   end
@@ -420,6 +419,10 @@ function M.on_entity_died(event)
   if entity.surface == game.surfaces.nauvis and is_connector(entity) then
     mined_surface_connector(entity)
   end
+end
+
+function M.on_tick(_)
+  sync_player_inventories()
 end
 
 return M

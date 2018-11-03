@@ -86,7 +86,9 @@ local event_handlers = {
   end,
 
   on_tick = function(event)
-    Connector.on_tick(event.tick)
+    local tick = event.tick
+    Connector.on_tick(tick)
+    Editor.on_tick(tick)
   end,
 
   on_runtime_mod_setting_changed = function(event)
