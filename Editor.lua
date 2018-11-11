@@ -1,163 +1,84 @@
+local BaseEditor = require "lualib.BaseEditor.BaseEditor"
 local Connector = require "Connector"
 local Constants = require "Constants"
 
 local M = {}
-local SURFACE_NAME = Constants.SURFACE_NAME
-local UNDERGROUND_TILE_NAME = Constants.UNDERGROUND_TILE_NAME
 
-local editor_surface
-local player_state
+local Editor = {}
+local function super()
+  return BaseEditor.class
+end
+setmetatable(Editor, { __index = super() })
+
+function M.new()
+  local self = BaseEditor.new("beltlayer")
+  self.valid_editor_types = {
+    ["transport-belt"] = true,
+    ["underground-belt"] = true,
+  }
+  return M.restore(self)
+end
+
+function M.restore(self)
+  setmetatable(self, { __index = Editor })
+end
+
+function M.instance()
+  if global.editor then
+    return global.editor
+  else
+    return M.new()
+  end
+end
+
+function M.on_init()
+  global.editor = M.instance()
+end
+
+function M.on_load()
+  M.restore(global.editor)
+end
 
 local debug = function() end
 if Constants.DEBUG_ENABLED then
   debug = log
 end
 
-local function editor_autoplace_control()
-  for control in pairs(game.autoplace_control_prototypes) do
-    if control:find("dirt") then
-      return control
+local function find_in_area(args)
+  local area = args.area
+  if area.left_top.x >= area.right_bottom.x or area.left_top.y >= area.right_bottom.y then
+    args.position = area.left_top
+    args.area = nil
+  end
+  local surface = args.surface
+  args.surface = nil
+  return surface.find_entities_filtered(args)
+end
+
+local function is_connector_name(name)
+  return name:find("%-beltlayer%-connector$")
+end
+
+local function is_connector(entity)
+  return is_connector_name(entity.name)
+end
+
+local function is_connector_or_ghost(entity)
+  return is_connector(entity) or (entity.name == "entity-ghost" and is_connector_name(entity.ghost_name))
+end
+
+local function is_surface_connector(self, entity)
+  return is_connector(entity) and self:is_valid_aboveground_surface(entity.surface)
+end
+
+local function connector_in_area(surface, area)
+  local entities = find_in_area{surface = surface, area = area}
+  for _, entity in ipairs(entities) do
+    if is_connector_or_ghost(entity) then
+      return true
     end
-  end
-  -- pick one at random
-  return next(game.autoplace_control_prototypes)
-end
-
-local function create_editor_surface()
-  local autoplace_control = editor_autoplace_control()
-  local surface = game.create_surface(
-    SURFACE_NAME,
-    {
-      starting_area = "none",
-      water = "none",
-      cliff_settings = { cliff_elevation_0 = 1024 },
-      default_enable_all_autoplace_controls = false,
-      autoplace_controls = {
-        [autoplace_control] = {
-          frequency = "very-low",
-          size = "very-high",
-        },
-      },
-      autoplace_settings = {
-        decorative = { treat_missing_as_default = false },
-        entity = { treat_missing_as_default = false },
-      },
-    }
-  )
-  surface.daytime = 0.35
-  surface.freeze_daytime = true
-  global.editor_surface = surface
-end
-
-function M.on_init()
-  if game.surfaces[SURFACE_NAME] then
-    game.delete_surface(SURFACE_NAME)
-  else
-    create_editor_surface()
-  end
-  global.player_state = {}
-  M.on_load()
-end
-
-function M.on_load()
-  editor_surface = global.editor_surface
-  player_state = global.player_state
-end
-
-function M.on_surface_deleted(event)
-  if not game.surfaces[SURFACE_NAME] then
-    create_editor_surface()
-    editor_surface = global.editor_surface
-  end
-end
-
-local valid_editor_types = {
-  ["transport-belt"] = true,
-  ["underground-belt"] = true,
-}
-
-local function is_stack_valid_for_editor(stack)
-  local item_prototype
-  if stack.valid and stack.valid_for_read then
-    item_prototype = stack.prototype
-  elseif not stack.valid then
-    item_prototype = game.item_prototypes[stack.name]
-  else
-    return false
-  end
-  local place_result = item_prototype.place_result
-  if place_result and valid_editor_types[place_result.type] then
-    return true
   end
   return false
-end
-
-local function sync_player_inventory(character, player)
-  for name in pairs(valid_editor_types) do
-    local character_count = character.get_item_count(name)
-    local player_count = player.get_item_count(name)
-    if character_count > player_count then
-      player.insert{name = name, count = character_count - player_count}
-    elseif character_count < player_count then
-      player.remove_item{name = name, count = player_count - character_count}
-    end
-  end
-end
-
-local function sync_player_inventories()
-  for player_index, state in pairs(player_state) do
-    local character = state.character
-    if character then
-      local player = game.players[player_index]
-      if player.connected then
-        sync_player_inventory(character, player)
-      end
-    end
-  end
-end
-
-local function move_player_to_editor(player)
-  local success = player.clean_cursor()
-  if not success then return end
-  local player_index = player.index
-  player_state[player_index] = {
-    position = player.position,
-    surface = player.surface,
-    character = player.character,
-  }
-  player.character = nil
-  player.teleport(player.position, editor_surface)
-end
-
-local function return_player_from_editor(player)
-  local player_index = player.index
-  local state = player_state[player_index]
-  player.teleport(state.position, state.surface)
-  if state.character then
-    player.character = state.character
-  end
-  player_state[player_index] = nil
-end
-
-function M.toggle_editor_status_for_player(player_index)
-  local player = game.players[player_index]
-  if player.surface == editor_surface then
-    return_player_from_editor(player)
-  elseif player.surface == game.surfaces.nauvis then
-    move_player_to_editor(player)
-  else
-    player.print({"beltlayer-error.bad-surface-for-editor"})
-  end
-end
-
-local function abort_player_build(player, entity, message)
-  player.insert({name = entity.name, count = 1})
-  entity.surface.create_entity{
-    name = "flying-text",
-    position = entity.position,
-    text = message,
-  }
-  entity.destroy()
 end
 
 local function opposite_type(loader_type)
@@ -167,16 +88,21 @@ local function opposite_type(loader_type)
   return "input"
 end
 
-local function built_surface_connector(player, entity)
+local function surface_counterpart(entity)
+  local editor_surface = self:editor_surface_for_aboveground_surface(entity.surface)
+  if is_connector(entity) then
+    return editor_surface.find_entity(entity.name, entity.position)
+  end
+  return editor_surface.find_entity("beltlayer-bpproxy-"..name, entity.position)
+end
+
+local function on_built_surface_connector(self, creator, entity, stack)
   local position = entity.position
   local force = entity.force
-  if not editor_surface.is_chunk_generated(position) then
-    editor_surface.request_to_generate_chunks(position, 1)
-    editor_surface.force_generate_chunk_requests()
-  end
 
   local direction = entity.direction
   local loader_type = opposite_type(entity.loader_type)
+  local editor_surface = self:editor_surface_for_aboveground_surface(entity.surface)
   -- check for existing underground connector ghost
   local underground_ghost = editor_surface.find_entity("entity-ghost", position)
   if underground_ghost and underground_ghost.ghost_type == "loader" then
@@ -194,11 +120,7 @@ local function built_surface_connector(player, entity)
   }
 
   if not underground_connector then
-    if player then
-      abort_player_build(player, entity, {"beltlayer-error.underground-obstructed"})
-    else
-      entity.order_deconstruction(entity.force)
-    end
+    self.abort_build(creator, entity, stack, {"beltlayer-error.underground-obstructed"})
     return
   end
 
@@ -221,49 +143,31 @@ local function built_surface_connector(player, entity)
   Connector.new(entity, above_container, below_container)
 end
 
-local function item_for_entity(entity)
-  return next(entity.prototype.items_to_place_this)
-end
-
-local function player_built_underground_entity(player_index, stack)
-  local character = player_state[player_index].character
-  if character then
-    character.remove_item(stack)
-  end
-end
-
-local function is_connector(entity)
-  return entity.name:find("%-beltlayer%-connector$")
-end
-
-function M.on_player_built_entity(event)
-  local player_index = event.player_index
-  local player = game.players[player_index]
+function Editor:on_player_built_entity(event)
   local entity = event.created_entity
-  if not entity.valid or entity.name == "entity-ghost" then return end
-  local stack = event.stack
+  if not entity.valid then return end
+  super().on_built_entity(self, event)
+
+  local player = game.players[event.player_index]
+  local stack = entity.stack
   local surface = entity.surface
 
-  if event.mod_name == "upgrade-planner" then
-    -- work around https://github.com/Klonan/upgrade-planner/issues/10
-    stack = {name = item_for_entity(entity), count = 1}
-  end
-
   if is_connector(entity) then
-    if surface.name == "nauvis" then
-      built_surface_connector(player, entity)
+    if self:is_valid_aboveground_surface(surface) then
+      on_built_surface_connector(self, player, entity, stack)
     else
-      abort_player_build(player, entity, {"beltlayer-error.bad-surface-for-connector"})
+      self.abort_build(player, entity, stack, {"beltlayer-error.bad-surface-for-connector"})
     end
-  elseif surface == editor_surface then
-    player_built_underground_entity(player_index, stack)
   end
 end
 
-function M.on_robot_built_entity(_, entity, _)
+function Editor:on_robot_built_entity(event)
+  local entity = event.created_entity
   if not entity.valid then return end
-  if is_connector(entity) then
-    built_surface_connector(nil, entity)
+  super().on_robot_built_entity(self, event)
+
+  if is_surface_connector(self, entity) then
+    on_built_surface_connector(self, event.robot, entity, event.stack)
   end
 end
 
@@ -288,8 +192,9 @@ local function insert_transport_lines_to_buffer(entity, buffer)
   end
 end
 
-local function mined_surface_connector(entity, buffer)
+local function on_mined_surface_connector(self, entity, buffer)
   local above_container = entity.surface.find_entity("beltlayer-buffer", entity.position)
+  local editor_surface = self:editor_surface_for_aboveground_surface(entity.surface)
   local below_container = editor_surface.find_entity("beltlayer-buffer", entity.position)
   local underground_connector = editor_surface.find_entity(entity.name, entity.position)
   if buffer then
@@ -302,127 +207,122 @@ local function mined_surface_connector(entity, buffer)
   underground_connector.destroy()
 end
 
-local function return_to_character_or_spill(player, character, stack)
-  local inserted = character.insert(stack)
-  if inserted < stack.count then
-    player.print({"inventory-restriction.player-inventory-full", game.item_prototypes[stack.name].localised_name})
-    character.surface.spill_item_stack(
-      character.position,
-      {name = stack.name, count = stack.count - inserted})
-  end
-  return inserted
-end
-
-local function return_buffer_to_character(player_index, character, buffer)
-  local player = game.players[player_index]
-  for i=1,#buffer do
-    local stack = buffer[i]
-    if stack.valid_for_read then
-      local inserted = return_to_character_or_spill(player, character, stack)
-      if is_stack_valid_for_editor(stack) then
-        -- match editor player inventory to character inventory
-        stack.count = inserted
-      else
-        -- belt contents; don't allow placement in editor
-        stack.clear()
-      end
-    end
-  end
-end
-
-function M.on_picked_up_item(event)
-  local player = game.players[event.player_index]
-  if player.surface ~= editor_surface then return end
-  local character = player_state[event.player_index].character
-  if character then
-    local stack = event.item_stack
-    local inserted = return_to_character_or_spill(player, character, stack)
-    local excess = stack.count - inserted
-    if not is_stack_valid_for_editor(stack) then
-      player.remove_item(stack)
-    elseif excess > 0 then
-      player.remove_item{name = stack.name, count = excess}
-    end
-  end
-end
-
-local function player_mined_from_editor(event)
-  local character = player_state[event.player_index].character
-  if character then
-    return_buffer_to_character(event.player_index, character, event.buffer)
-  end
-end
-
-function M.on_player_mined_item(event)
-  if event.mod_name == "upgrade-planner" then
-    -- upgrade-planner won't insert to character inventory
-    local player = game.players[event.player_index]
-    local character = player_state[event.player_index].character
-    if character then
-      local stack = event.item_stack
-      local count = stack.count
-      local inserted = return_to_character_or_spill(player, character, stack)
-      local excess = count - inserted
-      if excess > 0 then
-        -- try to match editor inventory to character inventory
-        player.remove_item{name = event.item_stack.name, count = excess}
-      end
-    end
-  end
-end
-
-function M.on_player_mined_entity(event)
+function Editor:on_player_mined_entity(event)
+  super().on_player_mined_entity(self, event)
   local entity = event.entity
-  local surface = entity.surface
-  if surface == editor_surface then
-    player_mined_from_editor(event)
-  elseif surface.name == "nauvis" and is_connector(entity) then
-    mined_surface_connector(entity, event.buffer)
+  if entity.valid and is_surface_connector(self, entity) then
+    on_mined_surface_connector(self, entity, event.buffer)
   end
 end
 
-function M.on_robot_mined_entity(_, entity, buffer)
-  if entity.surface.name == "nauvis" and is_connector(entity) then
-    mined_surface_connector(entity, buffer)
+function Editor:on_robot_mined_entity(event)
+  super().on_player_mined_entity(self, event)
+  local entity = event.entity
+  if entity.valid and is_surface_connector(self, entity) then
+    on_mined_surface_connector(self, entity, event.buffer)
   end
 end
 
 local handling_rotation = false
-function M.on_player_rotated_entity(event)
+function BaseEditor:on_player_rotated_entity(event)
   if handling_rotation then return end
   local entity = event.entity
   if not entity or not entity.valid then return end
   if is_connector(entity) then
-    if entity.surface == editor_surface then
-      local above_connector = game.surfaces.nauvis.find_entity(entity.name, entity.position)
+    handling_rotation = true
+    local surface = entity.surface
+    if self:is_editor_surface(surface) then
+      local aboveground_surface = self:aboveground_surface_for_editor_surface(surface)
+      local above_connector = aboveground_surface.find_entity(entity.name, entity.position)
       if above_connector then
-        handling_rotation = true
         above_connector.rotate{by_player = event.player_index}
-        handling_rotation = false
         Connector.for_entity(above_connector):rotate()
       end
-    elseif entity.surface == game.surfaces.nauvis then
+    elseif self:is_valid_aboveground_surface(surface) then
+      local editor_surface = self:editor_surface_for_aboveground_surface(surface)
       local below_connector = editor_surface.find_entity(entity.name, entity.position)
       if below_connector then
-        handling_rotation = true
         below_connector.rotate{by_player = event.player_index}
-        handling_rotation = false
       end
       Connector.for_entity(entity):rotate()
+    end
+    handling_rotation = false
+  end
+end
+
+function Editor:on_entity_died(event)
+  local entity = event.entity
+  if not entity or not entity.valid then return end
+  if is_surface_connector(self, entity) then
+    on_mined_surface_connector(self, entity, nil)
+  end
+end
+
+------------------------------------------------------------------------------------------------------------------------
+-- deconstruction
+
+local previous_connector_ghost_deconstruction_tick
+local previous_connector_ghost_deconstruction_player_index
+
+local function on_player_deconstructed_surface_area(player, area, filter)
+  if not connector_in_area(player.surface, area) and
+    (player.index ~= previous_connector_ghost_deconstruction_player_index or
+    game.tick ~= previous_connector_ghost_deconstruction_tick) then
+    return
+  end
+  local underground_entities = self:order_underground_deconstruction(player, editor_surface, area, tool)
+  if next(underground_entities) and
+     settings.get_player_settings(player)["beltlayer-deconstruction-warning"].value then
+    player.print({"beltlayer-message.marked-for-deconstruction", #underground_entities})
+  end
+end
+
+local function on_player_deconstructed_underground_area(player, editor_surface, area, tool)
+  local underground_entities = self:order_underground_deconstruction(player, editor_surface, area, tool)
+  for _, entity in ipairs(underground_entities) do
+    if is_connector(entity.name) then
+      local counterpart = surface_counterpart(entity)
+      if counterpart then
+        entity.order_deconstruction(player.force, player)
+      end
+      local bpproxy = self:surface_counterpart_bpproxy(entity)
+      if bpproxy then
+        bpproxy.destroy()
+      end
     end
   end
 end
 
-function M.on_entity_died(event)
-  local entity = event.entity
-  if not entity or not entity.valid then return end
-  if entity.surface == game.surfaces.nauvis and is_connector(entity) then
-    mined_surface_connector(entity)
+function Editor:on_player_deconstructed_area(event)
+  if event.alt then return end
+  local player = game.players[event.player_index]
+  local tool = player.cursor_stack
+  if not tool or not tool.valid_for_read or not tool.is_deconstruction_item then return end
+  local surface = player.surface
+  if self:is_valid_aboveground_surface(surface) then
+    return on_player_deconstructed_surface_area(player, edotr_surface, event.area, tool)
+  elseif self:is_editor_surface(surface) then
+    return on_player_deconstructed_underground_area(player, editor_surface, event.area, tool)
   end
 end
 
-function M.on_tick(_)
-  sync_player_inventories()
+function Editor:on_pre_ghost_deconstructed(event)
+  local ghost = event.ghost
+  if is_connector_name(ghost.ghost_name) and self:is_valid_aboveground_surface(ghost.surface) then
+    previous_connector_ghost_deconstruction_player_index = event.player_index
+    previous_connector_ghost_deconstruction_tick = event.tick
+  end
+  super().on_pre_ghost_deconstructed(self)
+end
+
+function Editor:on_player_setup_blueprint(event)
+  local player = game.players[event.player_index].surface
+  if not self:is_valid_aboveground_surface(surface) then return end
+  local area = event.area
+
+  if connector_in_area(surface, area) then
+    super().capture_underground_entities_in_blueprint(self, event)
+  end
 end
 
 return M
