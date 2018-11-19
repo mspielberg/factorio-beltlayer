@@ -12,31 +12,27 @@ setmetatable(Editor, { __index = super() })
 
 function M.new()
   local self = BaseEditor.new("beltlayer")
-  self.valid_editor_types = {
-    ["transport-belt"] = true,
-    ["underground-belt"] = true,
-  }
+  self.valid_editor_types = { "transport-belt", "underground-belt" }
+  global.editor = self
   return M.restore(self)
 end
 
 function M.restore(self)
-  setmetatable(self, { __index = Editor })
+  return setmetatable(self, { __index = Editor })
 end
 
 function M.instance()
   if global.editor then
-    return global.editor
+    return M.restore(global.editor)
   else
     return M.new()
   end
 end
 
-function M.on_init()
-  global.editor = M.instance()
-end
-
 function M.on_load()
-  M.restore(global.editor)
+  if global.editor then
+    M.restore(global.editor)
+  end
 end
 
 local debug = function() end
@@ -147,9 +143,10 @@ function Editor:on_player_built_entity(event)
   local entity = event.created_entity
   if not entity.valid then return end
   super().on_built_entity(self, event)
+  if not entity.valid then return end
 
   local player = game.players[event.player_index]
-  local stack = entity.stack
+  local stack = event.stack
   local surface = entity.surface
 
   if is_connector(entity) then
@@ -165,6 +162,7 @@ function Editor:on_robot_built_entity(event)
   local entity = event.created_entity
   if not entity.valid then return end
   super().on_robot_built_entity(self, event)
+  if not entity.valid then return end
 
   if is_surface_connector(self, entity) then
     on_built_surface_connector(self, event.robot, entity, event.stack)
@@ -216,7 +214,7 @@ function Editor:on_player_mined_entity(event)
 end
 
 function Editor:on_robot_mined_entity(event)
-  super().on_player_mined_entity(self, event)
+  super().on_robot_mined_entity(self, event)
   local entity = event.entity
   if entity.valid and is_surface_connector(self, entity) then
     on_mined_surface_connector(self, entity, event.buffer)
@@ -224,7 +222,7 @@ function Editor:on_robot_mined_entity(event)
 end
 
 local handling_rotation = false
-function BaseEditor:on_player_rotated_entity(event)
+function Editor:on_player_rotated_entity(event)
   if handling_rotation then return end
   local entity = event.entity
   if not entity or not entity.valid then return end
@@ -264,12 +262,13 @@ end
 local previous_connector_ghost_deconstruction_tick
 local previous_connector_ghost_deconstruction_player_index
 
-local function on_player_deconstructed_surface_area(player, area, filter)
+local function on_player_deconstructed_surface_area(self, player, aboveground_surface, area, tool)
   if not connector_in_area(player.surface, area) and
     (player.index ~= previous_connector_ghost_deconstruction_player_index or
     game.tick ~= previous_connector_ghost_deconstruction_tick) then
     return
   end
+  local editor_surface = self:editor_surface_for_aboveground_surface(aboveground_surface)
   local underground_entities = self:order_underground_deconstruction(player, editor_surface, area, tool)
   if next(underground_entities) and
      settings.get_player_settings(player)["beltlayer-deconstruction-warning"].value then
@@ -277,10 +276,10 @@ local function on_player_deconstructed_surface_area(player, area, filter)
   end
 end
 
-local function on_player_deconstructed_underground_area(player, editor_surface, area, tool)
+local function on_player_deconstructed_underground_area(self, player, editor_surface, area, tool)
   local underground_entities = self:order_underground_deconstruction(player, editor_surface, area, tool)
   for _, entity in ipairs(underground_entities) do
-    if is_connector(entity.name) then
+    if is_connector(entity) then
       local counterpart = surface_counterpart(entity)
       if counterpart then
         entity.order_deconstruction(player.force, player)
@@ -300,9 +299,9 @@ function Editor:on_player_deconstructed_area(event)
   if not tool or not tool.valid_for_read or not tool.is_deconstruction_item then return end
   local surface = player.surface
   if self:is_valid_aboveground_surface(surface) then
-    return on_player_deconstructed_surface_area(player, edotr_surface, event.area, tool)
+    return on_player_deconstructed_surface_area(self, player, surface, event.area, tool)
   elseif self:is_editor_surface(surface) then
-    return on_player_deconstructed_underground_area(player, editor_surface, event.area, tool)
+    return on_player_deconstructed_underground_area(self, player, surface, event.area, tool)
   end
 end
 
@@ -312,7 +311,7 @@ function Editor:on_pre_ghost_deconstructed(event)
     previous_connector_ghost_deconstruction_player_index = event.player_index
     previous_connector_ghost_deconstruction_tick = event.tick
   end
-  super().on_pre_ghost_deconstructed(self)
+  super().on_pre_ghost_deconstructed(self, event)
 end
 
 function Editor:on_player_setup_blueprint(event)
@@ -323,6 +322,10 @@ function Editor:on_player_setup_blueprint(event)
   if connector_in_area(surface, area) then
     super().capture_underground_entities_in_blueprint(self, event)
   end
+end
+
+function Editor:on_tick(event)
+  return BaseEditor.on_tick(event)
 end
 
 return M
