@@ -16,9 +16,7 @@ function M.on_load()
   update_interval = settings.global["beltlayer-buffer-duration"].value
   for _, connector in pairs(all_connectors) do
     M.restore(connector)
-    if connector.next_tick then
-      Scheduler.schedule(connector.next_tick, function(tick) connector:update(tick) end)
-    end
+    Scheduler.schedule(connector.next_tick or 0, function(tick) connector:update(tick) end)
   end
 end
 
