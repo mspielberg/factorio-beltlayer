@@ -1,6 +1,5 @@
 local BaseEditor = require "lualib.BaseEditor.BaseEditor"
 local Connector = require "Connector"
-local Constants = require "Constants"
 
 local M = {}
 
@@ -36,9 +35,7 @@ function M.on_load()
 end
 
 local debug = function() end
-if Constants.DEBUG_ENABLED then
-  debug = log
-end
+-- debug = log
 
 local function find_in_area(args)
   local area = args.area
