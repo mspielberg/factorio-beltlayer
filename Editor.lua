@@ -4,10 +4,8 @@ local Connector = require "Connector"
 local M = {}
 
 local Editor = {}
-local function super()
-  return BaseEditor.class
-end
-setmetatable(Editor, { __index = super() })
+local super = BaseEditor.class
+setmetatable(Editor, { __index = super })
 
 function M.new()
   local self = BaseEditor.new("beltlayer")
@@ -139,7 +137,7 @@ end
 function Editor:on_built_entity(event)
   local entity = event.created_entity
   if not entity.valid then return end
-  super().on_built_entity(self, event)
+  super.on_built_entity(self, event)
   if not entity.valid then return end
 
   local player = game.players[event.player_index]
@@ -158,7 +156,7 @@ end
 function Editor:on_robot_built_entity(event)
   local entity = event.created_entity
   if not entity.valid then return end
-  super().on_robot_built_entity(self, event)
+  super.on_robot_built_entity(self, event)
   if not entity.valid then return end
 
   if is_surface_connector(self, entity) then
@@ -203,7 +201,7 @@ local function on_mined_surface_connector(self, entity, buffer)
 end
 
 function Editor:on_player_mined_entity(event)
-  super().on_player_mined_entity(self, event)
+  super.on_player_mined_entity(self, event)
   local entity = event.entity
   if entity.valid and is_surface_connector(self, entity) then
     on_mined_surface_connector(self, entity, event.buffer)
@@ -211,7 +209,7 @@ function Editor:on_player_mined_entity(event)
 end
 
 function Editor:on_robot_mined_entity(event)
-  super().on_robot_mined_entity(self, event)
+  super.on_robot_mined_entity(self, event)
   local entity = event.entity
   if entity.valid and is_surface_connector(self, entity) then
     on_mined_surface_connector(self, entity, event.buffer)
@@ -308,7 +306,7 @@ function Editor:on_pre_ghost_deconstructed(event)
     previous_connector_ghost_deconstruction_player_index = event.player_index
     previous_connector_ghost_deconstruction_tick = event.tick
   end
-  super().on_pre_ghost_deconstructed(self, event)
+  super.on_pre_ghost_deconstructed(self, event)
 end
 
 function Editor:on_player_setup_blueprint(event)
@@ -317,7 +315,7 @@ function Editor:on_player_setup_blueprint(event)
   local area = event.area
 
   if connector_in_area(surface, area) then
-    super().capture_underground_entities_in_blueprint(self, event)
+    super.capture_underground_entities_in_blueprint(self, event)
   end
 end
 
