@@ -73,13 +73,14 @@ local function from_to_inventories(self)
 end
 
 local function transfer_special(from, to, name)
-  -- search for empty stack
+  -- search for empty stack in target inventory
   for i=1,#to do
-    local stack = to[i]
-    if not stack.valid_for_read then
+    local to_stack = to[i]
+    if not to_stack.valid_for_read then
       local from_stack = from.find_item_stack(name)
       if from_stack then
-        stack.swap_stack(from_stack)
+        to_stack.swap_stack(from_stack)
+        return to_stack.count
       else
         return
       end
@@ -113,8 +114,8 @@ local function transfer(self, from, to)
     end
 
     if proto.type ~= "item" then
-      transfer_special(from, to, name)
-      items_to_transfer = items_to_transfer - 1
+      local transferred = transfer_special(from, to, name)
+      items_to_transfer = items_to_transfer - transferred
     else
       local inserted = to.insert{name = name, count = count}
       if inserted == 0 then
