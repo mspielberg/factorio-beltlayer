@@ -19,7 +19,7 @@ end
 
 local event_handlers = {
   on_built_entity = function(event)
-    editor:on_player_built_entity(event)
+    editor:on_built_entity(event)
   end,
 
   on_robot_built_entity = function(event)

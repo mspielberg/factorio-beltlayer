@@ -139,7 +139,7 @@ local function on_built_surface_connector(self, creator, entity, stack)
   Connector.new(entity, above_container, below_container)
 end
 
-function Editor:on_player_built_entity(event)
+function Editor:on_built_entity(event)
   local entity = event.created_entity
   if not entity.valid then return end
   super().on_built_entity(self, event)
