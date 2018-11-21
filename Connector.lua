@@ -127,7 +127,7 @@ local function transfer(self, from, to)
     end
 
     if items_to_transfer <= 0 then
-      return smallest_stack_size or 50
+      return smallest_stack_size
     end
   end
 
