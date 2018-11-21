@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.2.0
+Date: 29.10.2018
+  Changes:
+    - Major internal refactor based on common codebase with Pipelayer.
+    - Add compatibility with SeaBlock.
+    - Add compatibility with New Game+.
+---------------------------------------------------------------------------------------------------
 Version: 0.1.9
 Date: 29.10.2018
   Bugfixes:
