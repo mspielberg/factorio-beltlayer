@@ -22,7 +22,6 @@ end
 
 function M.new(above_connector_entity, above_container, below_container)
   local self = {
-    unit_number = above_connector_entity.unit_number,
     above_loader = above_connector_entity,
     above_inv = above_container.get_inventory(defines.inventory.chest),
     below_inv = below_container.get_inventory(defines.inventory.chest),
@@ -30,7 +29,7 @@ function M.new(above_connector_entity, above_container, below_container)
     items_per_tick = above_connector_entity.prototype.belt_speed * 32 * 2 / 9,
     next_tick = nil,
   }
-  all_connectors[self.unit_number] = self
+  all_connectors[above_connector_entity.unit_number] = self
   self = M.restore(self)
   self:update(game.tick)
 end
