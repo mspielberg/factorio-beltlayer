@@ -254,13 +254,16 @@ end
 ------------------------------------------------------------------------------------------------------------------------
 -- deconstruction
 
+-- Set whenever a constructor ghost is deconstructed, e.g. by deconstruction tool,
+-- so we can decide whether to deconstruct underground also.
 local previous_connector_ghost_deconstruction_tick
 local previous_connector_ghost_deconstruction_player_index
 
 local function on_player_deconstructed_surface_area(self, player, aboveground_surface, area, tool)
   if not connector_in_area(player.surface, area) and
-    (player.index ~= previous_connector_ghost_deconstruction_player_index or
-    game.tick ~= previous_connector_ghost_deconstruction_tick) then
+     (player.index ~= previous_connector_ghost_deconstruction_player_index or
+     game.tick ~= previous_connector_ghost_deconstruction_tick) then
+    -- no connectors present, and no connector ghosts deconstructed this tick by this player
     return
   end
   local editor_surface = self:editor_surface_for_aboveground_surface(aboveground_surface)
@@ -303,6 +306,9 @@ end
 function Editor:on_pre_ghost_deconstructed(event)
   local ghost = event.ghost
   if is_connector_name(ghost.ghost_name) and self:is_valid_aboveground_surface(ghost.surface) then
+    -- connector ghost deconstructed, so if this is the result of a deconstruction tool,
+    -- we want to deconstruct underground too, but by the time on_player_deconstructed_area is raised
+    -- there will be no ghosts, and if there were only ghosts we need to keep track of that fact.
     previous_connector_ghost_deconstruction_player_index = event.player_index
     previous_connector_ghost_deconstruction_tick = event.tick
   end
