@@ -16,7 +16,7 @@ function M.on_load()
   update_interval = settings.global["beltlayer-buffer-duration"].value
   for _, connector in pairs(all_connectors) do
     M.restore(connector)
-    Scheduler.schedule(connector.next_tick or 0, function(tick) connector:update(tick) end)
+    Scheduler.schedule(connector.next_tick or 0, function(t) connector:update(t) end)
   end
 end
 
@@ -32,7 +32,7 @@ function M.new(above_connector_entity, above_container, below_container)
   }
   all_connectors[self.unit_number] = self
   self = M.restore(self)
-  self:update()
+  self:update(game.tick)
 end
 
 function M.restore(self)
@@ -62,7 +62,7 @@ function Connector:rotate()
   self.below_inv.setbar()
   self.stack_size = nil
   self.next_tick = nil
-  self:update()
+  self:update(game.tick)
 end
 
 local function from_to_inventories(self)
@@ -142,10 +142,10 @@ end
 
 function Connector:update(tick)
   if not self:valid() then return end
-  tick = tick or game.tick
-  if self.next_tick and tick < self.next_tick then
-    return
-  end
+
+  -- Rotations may result in multiple updates being scheduled simultaneously.
+  -- Ignore unless this is the "next" tick.
+  if self.next_tick and tick < self.next_tick then return end
 
   local from, to = from_to_inventories(self)
   local stack_size = transfer(self, from, to)
@@ -154,9 +154,8 @@ function Connector:update(tick)
     set_buffer_limit(self, from, stack_size)
   end
 
-  local next_tick = game.tick + update_interval
-  self.next_tick = next_tick
-  Scheduler.schedule(next_tick, function(t) self:update(t) end)
+  self.next_tick = tick + update_interval
+  Scheduler.schedule(self.next_tick, function(t) self:update(t) end)
 end
 
 function M.on_tick(tick)
