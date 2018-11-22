@@ -316,7 +316,7 @@ function Editor:on_pre_ghost_deconstructed(event)
 end
 
 function Editor:on_player_setup_blueprint(event)
-  local player = game.players[event.player_index].surface
+  local surface = game.players[event.player_index].surface
   if not self:is_valid_aboveground_surface(surface) then return end
   local area = event.area
 
