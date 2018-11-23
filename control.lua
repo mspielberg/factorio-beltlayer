@@ -87,7 +87,7 @@ end
 script.on_init(on_init)
 script.on_load(on_load)
 script.on_configuration_changed(function(event)
-  if event.mod_changes.beltlayer then
+  if event.mod_changes.beltlayer and event.mod_changes.beltlayer.old_version then
     configchange.on_mod_version_changed(event.mod_changes.beltlayer.old_version)
     editor = global.editor
   end
