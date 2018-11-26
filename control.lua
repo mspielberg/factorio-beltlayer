@@ -89,6 +89,7 @@ local function on_configuration_changed(data)
     configchange.on_mod_version_changed(data.mod_changes.beltlayer.old_version)
     editor = global.editor
   end
+  editor:on_configuration_changed(data)
 end
 
 local function on_toggle_editor(event)

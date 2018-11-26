@@ -3,6 +3,8 @@ Version: 0.2.2
 Date: 22.11.2018
   Minor Features:
     - Improve support for placing blueprints with a mixture of above ground and underground entities.
+  Compatibility:
+    - Prevent rso-mod from generating biters on editor surfaces.
   Bugfixes:
     - Fix crash when placing a blueprint in the editor view.
 ---------------------------------------------------------------------------------------------------
