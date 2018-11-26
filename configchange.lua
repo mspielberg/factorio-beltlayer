@@ -49,4 +49,18 @@ add_migration{
   end,
 }
 
+add_migration{
+  name = "v0_2_3_remove_enemies",
+  version = {0,2,3},
+  task = function()
+    for surface_name, s in pairs(game.surfaces) do
+      if surface_name:find("^beltlayer") then
+        for _, entity in pairs(s.find_entities_filtered{force = "enemy"}) do
+          entity.destroy()
+        end
+      end
+    end
+  end,
+}
+
 return M
