@@ -22,6 +22,7 @@ end
 
 function M.new(above_connector_entity, above_container, below_container)
   local self = {
+    id = above_connector_entity.unit_number,
     above_loader = above_connector_entity,
     above_inv = above_container.get_inventory(defines.inventory.chest),
     below_inv = below_container.get_inventory(defines.inventory.chest),
@@ -29,7 +30,7 @@ function M.new(above_connector_entity, above_container, below_container)
     items_per_tick = above_connector_entity.prototype.belt_speed * 32 * 2 / 9,
     next_tick = nil,
   }
-  all_connectors[above_connector_entity.unit_number] = self
+  all_connectors[self.id] = self
   self = M.restore(self)
   self:update(game.tick)
 end
@@ -140,7 +141,10 @@ local function set_buffer_limit(self, from_inventory, stack_size)
 end
 
 function Connector:update(tick)
-  if not self:valid() then return end
+  if not self:valid() then
+    all_connectors[self.id] = nil
+    return
+  end
 
   -- Rotations may result in multiple updates being scheduled simultaneously.
   -- Ignore unless this is the "next" tick.

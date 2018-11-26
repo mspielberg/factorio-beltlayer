@@ -84,18 +84,20 @@ local event_handlers = {
   end,
 }
 
+local function on_configuration_changed(data)
+  if data.mod_changes.beltlayer and data.mod_changes.beltlayer.old_version then
+    configchange.on_mod_version_changed(data.mod_changes.beltlayer.old_version)
+    editor = global.editor
+  end
+end
+
 local function on_toggle_editor(event)
   editor:toggle_editor_status_for_player(event.player_index)
 end
 
 script.on_init(on_init)
 script.on_load(on_load)
-script.on_configuration_changed(function(event)
-  if event.mod_changes.beltlayer and event.mod_changes.beltlayer.old_version then
-    configchange.on_mod_version_changed(event.mod_changes.beltlayer.old_version)
-    editor = global.editor
-  end
-end)
+script.on_configuration_changed(on_configuration_changed)
 script.on_event("beltlayer-toggle-editor-view", on_toggle_editor)
 for event_name, handler in pairs(event_handlers) do
   script.on_event(defines.events[event_name], handler)

@@ -24,11 +24,27 @@ add_migration{
   version = {0,2,0},
   task = function()
     global.editor = Editor.new()
-    global.editor.player_state = global.player_state
+    global.editor.player_state = global.player_state or {}
     global.player_state = nil
     global.editor_surface = nil
     for _, connector in pairs(global.all_connectors) do
-      connector.items_per_tick = connector.above_loader.prototype.belt_speed * 32 * 2 / 9
+      if connector:valid() then
+        connector.items_per_tick = connector.above_loader.prototype.belt_speed * 32 * 2 / 9
+      end
+    end
+  end,
+}
+
+add_migration{
+  name = "v0_2_2_remove_invalid_connectors",
+  version = {0,2,2},
+  task = function()
+    for key, connector in pairs(global.all_connectors) do
+      if connector:valid() then
+        connector.id = key
+      else
+        global.all_connectors[key] = nil
+      end
     end
   end,
 }
