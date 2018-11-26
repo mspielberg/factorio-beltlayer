@@ -1,11 +1,18 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.2.2
+Date: 22.11.2018
+  Minor Features:
+    - Improve support for placing blueprints with a mixture of above ground and underground entities.
+  Bugfixes:
+    - Fix crash when placing a blueprint in the editor view.
+---------------------------------------------------------------------------------------------------
 Version: 0.2.1
 Date: 22.11.2018
   Bugfixes:
     - Fix crash on adding Beltlayer to an existing map.
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.0
-Date: 21.11.2018
+Date: 22.11.2018
   Changes:
     - Major internal refactor based on common codebase with Pipelayer.
     - Add compatibility with SeaBlock.

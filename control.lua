@@ -78,6 +78,10 @@ local event_handlers = {
   on_runtime_mod_setting_changed = function(event)
     Connector.on_runtime_mod_setting_changed(event.player_index, event.setting, event.setting_type)
   end,
+
+  on_put_item = function(event)
+    editor:on_put_item(event)
+  end,
 }
 
 local function on_toggle_editor(event)

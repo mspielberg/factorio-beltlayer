@@ -317,7 +317,6 @@ end
 
 function Editor:on_player_setup_blueprint(event)
   local surface = game.players[event.player_index].surface
-  if not self:is_valid_aboveground_surface(surface) then return end
   local area = event.area
 
   if connector_in_area(surface, area) then
