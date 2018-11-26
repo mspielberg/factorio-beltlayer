@@ -142,7 +142,17 @@ end
 
 function Connector:update(tick)
   if not self:valid() then
-    all_connectors[self.id] = nil
+    if self.id then
+      all_connectors[self.id] = nil
+    else
+      -- Invalid connector may have been scheduled before configchange migration
+      -- removed it from global.all_connectors.
+      for key, connector in pairs(all_connectors) do
+        if connector == self then
+          all_connectors[key] = nil
+        end
+      end
+    end
     return
   end
 

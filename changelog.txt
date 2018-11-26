@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.2.3
+Date: 26.11.2018
+  Compatibility:
+    - Remove biters from editor surfaces if rso-mod put them there in a prior version.
+  Bugfixes:
+    - Possible fix for crash when upgrading a map with earlier versions of beltlayer.
+---------------------------------------------------------------------------------------------------
 Version: 0.2.2
 Date: 25.11.2018
   Minor Features:
