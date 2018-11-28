@@ -82,17 +82,18 @@ local function transfer_special(from, to, name)
         to_stack.swap_stack(from_stack)
         return to_stack.count
       else
-        return
+        return 0
       end
     end
   end
+  return 0
 end
 
 local function transfer(self, from, to)
-  local smallest_stack_size
   local items_to_buffer = math.floor(self.items_per_tick * update_interval * 1.5)
   local items_to_transfer = items_to_buffer - to.get_item_count()
   if items_to_transfer <= 0 then
+    -- make a guess about appropriate stack size from existing items in destination
     for i=1,#to do
       if to[i].valid_for_read then
         return to[i].prototype.stack_size
@@ -102,6 +103,7 @@ local function transfer(self, from, to)
     error("no room to transfer, but also nothing in destination buffer")
   end
 
+  local smallest_stack_size
   for name, count in pairs(from.get_contents()) do
     if count > items_to_transfer then
       count = items_to_transfer
