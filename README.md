@@ -14,8 +14,11 @@ If the answer to any of these questions is yes, then you need Beltlayer.
 
 # How to use
 
-1. Place down two Underground belt connectors of the desired belt speed, one at the entrance and one at the exit. Connectors are researched at the same time as the normal underground belts of the same speed and use the same recipe. You can use any rotation for these connectors.
-1. Change the connectors between input and output mode with the rotation key (normally R).
+1. Build some Beltlayer connectors of the desired belt speed. Connectors are researched at the same time as the normal underground belts of the same speed and use the same recipe.
+
+    ![step 1](resources/crafting.png)
+
+1. Place down two connectors, one at the entrance and one at the exit. You can use any rotation for these connectors. Change the connectors between input and output mode with the rotation key (normally R).
 
     ![step 2](resources/step1.png)
 

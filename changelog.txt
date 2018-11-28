@@ -4,7 +4,7 @@ Date: 28.11.2018
   Compatibility:
     - Construction robots can now use underground ghosts created by Replicating Belts.
   Bugfixes:
-    - Fix potential crash when transferring special items (blueprints, armor, etc.). (https://mods.factorio.com/mod/beltlayer/discussion/5bfe1d29fbbc13000d7c0d64)
+    - Fix potential crash when transferring special items (ammo, armor, blueprints, guns, repair packs, etc.). (https://mods.factorio.com/mod/beltlayer/discussion/5bfe1d29fbbc13000d7c0d64)
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.3
 Date: 26.11.2018
