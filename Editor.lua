@@ -153,6 +153,13 @@ function Editor:on_built_entity(event)
   end
 end
 
+function Editor:script_raised_built(event)
+  local entity = event.created_entity
+  if entity and entity.name == "entity-ghost" then
+    super.on_built_entity(self, event)
+  end
+end
+
 function Editor:on_robot_built_entity(event)
   local entity = event.created_entity
   if not entity.valid then return end
