@@ -63,7 +63,7 @@ local beltlayer_buffer = {
 }
 if not settings.startup["beltlayer-show-buffer-contents"].value then
   beltlayer_buffer.flags[#beltlayer_buffer.flags+1] = "hide-alt-info"
-  belflayer_buffer.selection_box = nil
+  beltlayer_buffer.selection_box = nil
 end
 
 data:extend{beltlayer_buffer}
