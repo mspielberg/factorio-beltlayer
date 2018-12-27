@@ -17,7 +17,7 @@ data:extend{
 
   {
     type = "int-setting",
-    name = "beltlayer-buffer-duration",
+    name = "beltlayer-update-interval",
     setting_type = "runtime-global",
     minimum_value = 30,
     default_value = 300,

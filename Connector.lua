@@ -13,7 +13,7 @@ end
 
 function M.on_load()
   all_connectors = global.all_connectors
-  update_interval = settings.global["beltlayer-buffer-duration"].value
+  update_interval = settings.global["beltlayer-update-interval"].value
   for _, connector in pairs(all_connectors) do
     M.restore(connector)
     Scheduler.schedule(connector.next_tick or 0, function(t) connector:update(t) end)
@@ -44,7 +44,7 @@ function M.for_entity(above_connector_entity)
 end
 
 function M.on_runtime_mod_setting_changed(_, setting, _)
-  if setting == "beltlayer-buffer-duration" then
+  if setting == "beltlayer-update-interval" then
     update_interval = settings.global[setting].value
   end
 end
@@ -58,9 +58,6 @@ end
 function Connector:rotate()
   if not self:valid() then return end
   self.above_to_below = self.above_loader.loader_type == "input"
-  self.above_inv.setbar()
-  self.below_inv.setbar()
-  self.stack_size = nil
   self.next_tick = nil
   self:update(game.tick)
 end
@@ -90,56 +87,24 @@ local function transfer_special(from, to, name)
 end
 
 local function transfer(self, from, to)
-  local items_to_buffer = math.floor(self.items_per_tick * update_interval * 1.5)
-  local items_to_transfer = items_to_buffer - to.get_item_count()
-  if items_to_transfer <= 0 then
-    -- make a guess about appropriate stack size from existing items in destination
-    for i=1,#to do
-      if to[i].valid_for_read then
-        return to[i].prototype.stack_size
-      end
-    end
-    -- should be unreachable
-    error("no room to transfer, but also nothing in destination buffer")
-  end
-
-  local smallest_stack_size
   for name, count in pairs(from.get_contents()) do
-    if count > items_to_transfer then
-      count = items_to_transfer
-    end
-
     local proto = game.item_prototypes[name]
-    local stack_size = proto.stack_size
-    if not smallest_stack_size or stack_size < smallest_stack_size then
-      smallest_stack_size = stack_size
-    end
+    local transferred = 0
 
     if proto.type ~= "item" then
-      local transferred = transfer_special(from, to, name)
-      items_to_transfer = items_to_transfer - transferred
+      transferred = transfer_special(from, to, name)
     else
-      local inserted = to.insert{name = name, count = count}
-      if inserted == 0 then
-        -- all full
-        return smallest_stack_size
+      transferred = to.insert{name = name, count = count}
+      if transferred > 0 then
+        from.remove{name = name, count = transferred}
       end
-      from.remove{name = name, count = inserted}
-      items_to_transfer = items_to_transfer - inserted
     end
 
-    if items_to_transfer <= 0 then
-      return smallest_stack_size
+    if transferred == 0 then
+      -- all full
+      return
     end
   end
-
-  return smallest_stack_size or 50
-end
-
-local function set_buffer_limit(self, from_inventory, stack_size)
-  local items_to_buffer = self.items_per_tick * update_interval
-  local stacks_to_buffer = math.ceil(items_to_buffer / stack_size)
-  from_inventory.setbar(stacks_to_buffer + 1)
 end
 
 function Connector:update(tick)
@@ -163,11 +128,7 @@ function Connector:update(tick)
   if self.next_tick and tick < self.next_tick then return end
 
   local from, to = from_to_inventories(self)
-  local stack_size = transfer(self, from, to)
-  if not self.stack_size or self.stack_size ~= stack_size then
-    self.stack_size = stack_size
-    set_buffer_limit(self, from, stack_size)
-  end
+  transfer(self, from, to)
 
   self.next_tick = tick + update_interval
   Scheduler.schedule(self.next_tick, function(t) self:update(t) end)

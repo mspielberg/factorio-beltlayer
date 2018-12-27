@@ -63,4 +63,16 @@ add_migration{
   end,
 }
 
+add_migration{
+  name = "v0_2_5_reset_buffer_bars",
+  version = {0,2,5},
+  task = function()
+    for surface_name, s in pairs(game.surfaces) do
+      for _, entity in pairs(s.find_entities_filtered{name = "beltlayer-buffer"}) do
+        entity.get_inventory(defines.inventory.chest).setbar()
+      end
+    end
+  end,
+}
+
 return M
