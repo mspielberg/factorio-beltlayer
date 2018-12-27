@@ -44,33 +44,26 @@ local function make_connector(ug)
   return loader
 end
 
-local fastest_belt_name = ""
-local fastest_belt_speed = 0
 for name, ug in pairs(data.raw["underground-belt"]) do
   if ug.minable then
-    if ug.speed > fastest_belt_speed then
-      fastest_belt_name = name
-      fastest_belt_speed = ug.speed
-    end
-    local loader = make_connector(ug)
-    data:extend{loader}
+    data:extend{make_connector(ug)}
   end
 end
 
-local max_items_per_tick = fastest_belt_speed * 2 / (9 / 32)
-local max_stacks_per_tick = max_items_per_tick / 50
-local max_stacks_per_update = max_stacks_per_tick * 60 * 5
-log("fastest belt is "..fastest_belt_name.." "..(max_items_per_tick * 60).." items/s")
-log("projected max stacks per update: "..max_stacks_per_update)
-
-data:extend{
-  {
-    type = "container",
-    name = "beltlayer-buffer",
-    collision_box = {{-0.1, -0.1}, {0.1, 0.1}},
-    collision_mask = {},
-    flags = {"player-creation", "hide-alt-info", "not-blueprintable", "not-deconstructable"},
-    inventory_size = max_stacks_per_update * 2,
-    picture = empty_sprite,
-  }
+local beltlayer_buffer = {
+  type = "container",
+  name = "beltlayer-buffer",
+  collision_box = {{-0.1, -0.1}, {0.1, 0.1}},
+  collision_mask = {},
+  selection_box = {{-0.2, -0.2}, {0.2, 0.2}},
+  selection_priority = 100,
+  flags = {"player-creation", "not-blueprintable", "not-deconstructable"},
+  inventory_size = settings.startup["beltlayer-buffer-stacks"].value,
+  picture = empty_sprite,
 }
+if not settings.startup["beltlayer-show-buffer-contents"].value then
+  beltlayer_buffer.flags[#beltlayer_buffer.flags+1] = "hide-alt-info"
+  belflayer_buffer.selection_box = nil
+end
+
+data:extend{beltlayer_buffer}
