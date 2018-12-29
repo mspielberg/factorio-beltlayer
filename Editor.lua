@@ -10,26 +10,11 @@ setmetatable(Editor, { __index = super })
 function M.new()
   local self = BaseEditor.new("beltlayer")
   self.valid_editor_types = { "transport-belt", "underground-belt" }
-  global.editor = self
   return M.restore(self)
 end
 
 function M.restore(self)
   return setmetatable(self, { __index = Editor })
-end
-
-function M.instance()
-  if global.editor then
-    return M.restore(global.editor)
-  else
-    return M.new()
-  end
-end
-
-function M.on_load()
-  if global.editor then
-    M.restore(global.editor)
-  end
 end
 
 local debug = function() end
@@ -329,10 +314,6 @@ function Editor:on_player_setup_blueprint(event)
   if connector_in_area(surface, area) then
     super.capture_underground_entities_in_blueprint(self, event)
   end
-end
-
-function Editor:on_tick(event)
-  return BaseEditor.on_tick(event)
 end
 
 return M

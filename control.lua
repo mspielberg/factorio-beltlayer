@@ -5,15 +5,15 @@ local Editor = require "Editor"
 local editor
 
 local function on_init()
-  editor = Editor.instance()
+  global.editor = Editor.new()
+  editor = global.editor
   Connector.on_init()
 end
 
 local function on_load()
   if global.editor then
-    editor = global.editor
+    editor = Editor.restore(global.editor)
   end
-  Editor.on_load()
   Connector.on_load()
 end
 
