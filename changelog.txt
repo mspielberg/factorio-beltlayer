@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.2.7
+Date: 28.12.2018
+  Changes:
+    - Uninstalling beltlayer and then reinstalling it removes any old underground belts and their contents.
+  Bugfixes:
+    - Fix crash when using upgrade-planner outside the editor interface. (https://mods.factorio.com/mod/beltlayer/discussion/5c25659e4d145a000c5f1118)
+---------------------------------------------------------------------------------------------------
 Version: 0.2.6
 Date: 27.12.2018
   Bugfixes:
