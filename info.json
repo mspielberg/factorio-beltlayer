@@ -2,8 +2,8 @@
   "name": "beltlayer",
   "title": "Beltlayer",
   "description": "Route your belts freely underground.",
-  "factorio_version": "0.16",
+  "factorio_version": "0.17",
   "author": "Therax",
-  "version": "0.2.8",
-  "dependencies": ["? boblogistics >= 0.16.0"]
+  "version": "0.3.0",
+  "dependencies": ["? boblogistics >= 0.17.0"]
 }

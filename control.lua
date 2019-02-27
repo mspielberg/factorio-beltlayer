@@ -62,8 +62,8 @@ local event_handlers = {
     editor:on_player_deconstructed_area(event)
   end,
 
-  on_canceled_deconstruction = function(event)
-    editor:on_canceled_deconstruction(event)
+  on_cancelled_deconstruction = function(event)
+    editor:on_cancelled_deconstruction(event)
   end,
 
   on_player_rotated_entity = function(event)
@@ -105,7 +105,9 @@ script.on_load(on_load)
 script.on_configuration_changed(on_configuration_changed)
 script.on_event("beltlayer-toggle-editor-view", on_toggle_editor)
 for event_name, handler in pairs(event_handlers) do
-  script.on_event(defines.events[event_name], handler)
+  local event_id = defines.events[event_name]
+  if not event_id then error("unknown event: "..event_name) end
+  script.on_event(event_id, handler)
 end
 script.on_event(defines.events.on_tick, nil)
 script.on_nth_tick(10, event_handlers.on_tick)

@@ -2,16 +2,17 @@ require "util"
 
 local empty_sprite = {
   filename = "__core__/graphics/empty.png",
-  width = 0,
-  height = 0,
+  width = 1,
+  height = 1,
   frame_count = 1,
 }
 
 local overlay_icon = {
-  icon = "__core__/graphics/arrows/indication-arrow-up-to-down.png",
-  icon_size = 64,
-  scale = 0.25,
+  icon = "__core__/graphics/icons/collapse.png",
+  icon_size = 32,
+  scale = 0.5,
   shift = {8, -8},
+  tint = {r=1,g=.7,b=0},
 }
 
 local function make_connector(ug)
@@ -40,6 +41,7 @@ local function make_connector(ug)
   loader.filter_count = 0
   loader.container_distance = 0
   loader.belt_distance = 0
+  loader.next_upgrade = loader.next_upgrade and loader.next_upgrade .. "-beltlayer-connector"
 
   return loader
 end
