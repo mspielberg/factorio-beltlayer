@@ -75,4 +75,23 @@ add_migration{
   end,
 }
 
+add_migration{
+  name = "v0_3_1_remove_duplicate_bpproxies",
+  version = {0,3,1},
+  task = function()
+    for _, surface in pairs(game.surfaces) do
+      local prev = nil
+      for _, en in ipairs(surface.find_entities_filtered{name = "entity-ghost"}) do
+        if en.ghost_name:find("^beltlayer%-bpproxy%-") then
+          if prev and prev.position.x == en.position.x and prev.position.y == en.position.y then
+            en.destroy()
+          else
+            prev = en
+          end
+        end
+      end
+    end
+  end,
+}
+
 return M
