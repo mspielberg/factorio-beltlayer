@@ -17,75 +17,33 @@ local function on_load()
   Connector.on_load()
 end
 
+local function on_runtime_mod_setting_changed(event)
+  Connector.on_runtime_mod_setting_changed(event.player_index, event.setting, event.setting_type)
+end
+
+local function on_tick(event)
+  Connector.on_tick(event.tick)
+  editor:on_tick(event)
+end
+
 local event_handlers = {
-  script_raised_built = function(event)
-    editor:script_raised_built(event)
-  end,
-
-  on_built_entity = function(event)
-    editor:on_built_entity(event)
-  end,
-
-  on_robot_built_entity = function(event)
-    editor:on_robot_built_entity(event)
-  end,
-
-  on_picked_up_item = function(event)
-    editor:on_picked_up_item(event)
-  end,
-
-  on_pre_player_mined_item = function(event)
-    editor:on_pre_player_mined_item(event)
-  end,
-
-  on_player_mined_item = function(event)
-    editor:on_player_mined_item(event)
-  end,
-
-  on_player_mined_entity = function(event)
-    editor:on_player_mined_entity(event)
-  end,
-
-  on_robot_mined_entity = function(event)
-    editor:on_robot_mined_entity(event)
-  end,
-
-  on_player_setup_blueprint = function(event)
-    editor:on_player_setup_blueprint(event)
-  end,
-
-  on_pre_ghost_deconstructed = function(event)
-    editor:on_pre_ghost_deconstructed(event)
-  end,
-
-  on_player_deconstructed_area = function(event)
-    editor:on_player_deconstructed_area(event)
-  end,
-
-  on_cancelled_deconstruction = function(event)
-    editor:on_cancelled_deconstruction(event)
-  end,
-
-  on_player_rotated_entity = function(event)
-    editor:on_player_rotated_entity(event)
-  end,
-
-  on_entity_died = function(event)
-    editor:on_entity_died(event)
-  end,
-
-  on_tick = function(event)
-    Connector.on_tick(event.tick)
-    editor:on_tick(event)
-  end,
-
-  on_runtime_mod_setting_changed = function(event)
-    Connector.on_runtime_mod_setting_changed(event.player_index, event.setting, event.setting_type)
-  end,
-
-  on_put_item = function(event)
-    editor:on_put_item(event)
-  end,
+  on_built_entity                = function(event) editor:on_built_entity(event)              end,
+  on_cancelled_deconstruction    = function(event) editor:on_cancelled_deconstruction(event)  end,
+  on_entity_died                 = function(event) editor:on_entity_died(event)               end,
+  on_marked_for_deconstruction   = function(event) editor:on_marked_for_deconstruction(event) end,
+  on_picked_up_item              = function(event) editor:on_picked_up_item(event)            end,
+  on_player_deconstructed_area   = function(event) editor:on_player_deconstructed_area(event) end,
+  on_player_mined_entity         = function(event) editor:on_player_mined_entity(event)       end,
+  on_player_mined_item           = function(event) editor:on_player_mined_item(event)         end,
+  on_player_rotated_entity       = function(event) editor:on_player_rotated_entity(event)     end,
+  on_player_setup_blueprint      = function(event) editor:on_player_setup_blueprint(event)    end,
+  on_pre_ghost_deconstructed     = function(event) editor:on_pre_ghost_deconstructed(event)   end,
+  on_pre_player_mined_item       = function(event) editor:on_pre_player_mined_item(event)     end,
+  on_put_item                    = function(event) editor:on_put_item(event)                  end,
+  on_robot_built_entity          = function(event) editor:on_robot_built_entity(event)        end,
+  on_robot_mined_entity          = function(event) editor:on_robot_mined_entity(event)        end,
+  on_runtime_mod_setting_changed = on_runtime_mod_setting_changed,
+  script_raised_built            = function(event) editor:script_raised_built(event)          end,
 }
 
 local function on_configuration_changed(data)
@@ -109,5 +67,4 @@ for event_name, handler in pairs(event_handlers) do
   if not event_id then error("unknown event: "..event_name) end
   script.on_event(event_id, handler)
 end
-script.on_event(defines.events.on_tick, nil)
-script.on_nth_tick(10, event_handlers.on_tick)
+script.on_nth_tick(10, on_tick)
