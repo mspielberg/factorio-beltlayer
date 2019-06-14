@@ -299,6 +299,16 @@ function Editor:on_player_deconstructed_area(event)
   on_player_deconstructed_area(self, player, event.area, player.cursor_stack)
 end
 
+function Editor:on_marked_for_deconstruction(event)
+  local entity = event.entity
+  local player = event.player_index and game.players[event.player_index]
+  if entity.name == "beltlayer-buffer" then
+    entity.cancel_deconstruction(player and player.force or entity.force)
+  else
+    super.on_marked_for_deconstruction(self, event)
+  end
+end
+
 function Editor:on_pre_ghost_deconstructed(event)
   local ghost = event.ghost
   if is_connector_name(ghost.ghost_name) and self:is_valid_aboveground_surface(ghost.surface) then
