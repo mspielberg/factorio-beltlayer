@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.3.1
+Date: 13.06.2019
+  Bugfixes:
+    - Fix a crash when building a ghost but the underground is already occupied. (https://mods.factorio.com/mod/beltlayer/discussion/5cc4cea5073cd9000df85673)
+    - Fix a crash when deconstruction is cancelled by another mod. (https://mods.factorio.com/mod/beltlayer/discussion/5caf480702246e000bb51a1f)
+    - Fix a crash when mining a connector marked for deconstruction by the cut tool.
+  Minor Features:
+    - Add support for 0.17 cut tool.
+---------------------------------------------------------------------------------------------------
 Version: 0.3.0
 Date: 26.02.2019
   Changes:
