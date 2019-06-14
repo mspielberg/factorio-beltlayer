@@ -23,8 +23,13 @@ add_migration{
   name = "v0_2_0_migrate_globals",
   version = {0,2,0},
   task = function()
-    global.editor = Editor.new()
-    global.editor.player_state = global.player_state or {}
+    global.editor = {
+      name = "beltlayer",
+      proxy_prefix = "beltlayer-bpproxy-",
+      player_state = global.player_state or {},
+      valid_editor_types = { "transport-belt", "underground-belt" },
+    }
+    Editor.restore(global.editor)
     global.player_state = nil
     global.editor_surface = nil
     for _, connector in pairs(global.all_connectors) do
