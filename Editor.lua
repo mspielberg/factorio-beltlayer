@@ -251,8 +251,9 @@ end
 local previous_connector_ghost_deconstruction_tick
 local previous_connector_ghost_deconstruction_player_index
 
-local function on_player_deconstructed_surface_area(self, player, aboveground_surface, area, tool)
-  if not connector_in_area(player.surface, area) and
+local function on_player_deconstructed_surface_area(self, player, area, tool)
+  local aboveground_surface = player.surface
+  if not connector_in_area(aboveground_surface, area) and
      (player.index ~= previous_connector_ghost_deconstruction_player_index or
      game.tick ~= previous_connector_ghost_deconstruction_tick) then
     -- no connectors present, and no connector ghosts deconstructed this tick by this player
@@ -266,7 +267,8 @@ local function on_player_deconstructed_surface_area(self, player, aboveground_su
   end
 end
 
-local function on_player_deconstructed_underground_area(self, player, editor_surface, area, tool)
+local function on_player_deconstructed_underground_area(self, player, area, tool)
+  local editor_surface = player.surface
   local underground_entities = self:order_underground_deconstruction(player, editor_surface, area, tool)
   for _, entity in ipairs(underground_entities) do
     if is_connector(entity) then
@@ -282,17 +284,19 @@ local function on_player_deconstructed_underground_area(self, player, editor_sur
   end
 end
 
+local function on_player_deconstructed_area(self, player, area, tool)
+  local surface = player.surface
+  if self:is_valid_aboveground_surface(surface) then
+    return on_player_deconstructed_surface_area(self, player, area, tool)
+  elseif self:is_editor_surface(surface) then
+    return on_player_deconstructed_underground_area(self, player, area, tool)
+  end
+end
+
 function Editor:on_player_deconstructed_area(event)
   if event.alt then return end
   local player = game.players[event.player_index]
-  local tool = player.cursor_stack
-  if not tool or not tool.valid_for_read or not tool.is_deconstruction_item then return end
-  local surface = player.surface
-  if self:is_valid_aboveground_surface(surface) then
-    return on_player_deconstructed_surface_area(self, player, surface, event.area, tool)
-  elseif self:is_editor_surface(surface) then
-    return on_player_deconstructed_underground_area(self, player, surface, event.area, tool)
-  end
+  on_player_deconstructed_area(self, player, event.area, player.cursor_stack)
 end
 
 function Editor:on_pre_ghost_deconstructed(event)
@@ -308,11 +312,15 @@ function Editor:on_pre_ghost_deconstructed(event)
 end
 
 function Editor:on_player_setup_blueprint(event)
-  local surface = game.players[event.player_index].surface
+  local player = game.players[event.player_index]
   local area = event.area
 
-  if connector_in_area(surface, area) then
+  if connector_in_area(player.surface, area) then
     super.capture_underground_entities_in_blueprint(self, event)
+    if event.item == "cut-paste-tool" and event.alt then
+      local player = game.players[event.player_index]
+      on_player_deconstructed_area(self, player, area, nil)
+    end
   end
 end
 
