@@ -16,7 +16,6 @@ local function make_proxy(proto)
   local proxy_proto = util.table.deepcopy(proto)
   proxy_proto.name = "beltlayer-bpproxy-"..proto.name
   proxy_proto.localised_name = {"entity-name.beltlayer-bpproxy", proto.localised_name or {"entity-name."..proto.name}}
-  proxy_proto.collision_mask = {}
   proxy_proto.flags = {"player-creation"}
   proxy_proto.placeable_by = proxy_proto.placeable_by or {{item=proto.minable.result, count=1}}
   add_tint(proxy_proto, {r = 0.5, g = 0.5, b = 0.8, a = 0.25})
