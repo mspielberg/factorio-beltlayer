@@ -19,6 +19,7 @@ local function make_proxy(proto)
   proxy_proto.collision_mask = {}
   proxy_proto.flags = {"player-creation"}
   proxy_proto.placeable_by = proxy_proto.placeable_by or {{item=proto.minable.result, count=1}}
+  proxy_proto.next_upgrade = proto.next_upgrade and "beltlayer-bpproxy-"..proto.next_upgrade
   add_tint(proxy_proto, {r = 0.5, g = 0.5, b = 0.8, a = 0.25})
   return proxy_proto
 end
