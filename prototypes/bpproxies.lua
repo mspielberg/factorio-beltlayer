@@ -24,7 +24,7 @@ local function make_proxy(proto)
   return proxy_proto
 end
 
-for _, type in ipairs{"transport-belt", "underground-belt"} do
+for _, type in ipairs{"splitter", "transport-belt", "underground-belt"} do
   for _, proto in pairs(data.raw[type]) do
     if proto.minable and not proto.name:find("^beltlayer%-bpproxy%-") then
       data:extend{make_proxy(proto)}

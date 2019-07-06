@@ -99,4 +99,12 @@ add_migration{
   end,
 }
 
+add_migration{
+  name = "v0_4_0_add_splitter",
+  version = {0,4,0},
+  task = function()
+    global.editor.valid_editor_types = {"splitter", "transport-belt", "underground-belt"}
+  end,
+}
+
 return M
