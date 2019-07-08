@@ -104,18 +104,25 @@ local function on_built_surface_connector(self, creator, entity, stack)
   underground_connector.minable = false
 
   -- create buffer containers
-  local above_container = entity.surface.create_entity{
-    name = "beltlayer-buffer",
-    position = position,
-    force = force,
-  }
-  above_container.destructible = false
-  local below_container = editor_surface.create_entity{
-    name = "beltlayer-buffer",
-    position = position,
-    force = force,
-  }
-  below_container.destructible = false
+  local above_container = entity.surface.find_entity("beltlayer-buffer", position)
+  if not above_container then
+    above_container = entity.surface.create_entity{
+      name = "beltlayer-buffer",
+      position = position,
+      force = force,
+    }
+    above_container.destructible = false
+  end
+
+  local below_container = editor_surface.find_entity("beltlayer-buffer", position)
+  if not below_container then
+    below_container = editor_surface.create_entity{
+      name = "beltlayer-buffer",
+      position = position,
+      force = force,
+    }
+    below_container.destructible = false
+  end
 
   Connector.new(entity, above_container, below_container)
 end
@@ -178,18 +185,29 @@ local function insert_transport_lines_to_buffer(entity, buffer)
   end
 end
 
+local upgrade_in_progress
+local function upgrade_in_progress_matches(entity)
+  return upgrade_in_progress and
+    upgrade_in_progress.tick == game.tick and
+    upgrade_in_progress.entity == entity
+end
+
 local function on_mined_surface_connector(self, entity, buffer)
   local above_container = entity.surface.find_entity("beltlayer-buffer", entity.position)
   local editor_surface = self:editor_surface_for_aboveground_surface(entity.surface)
   local below_container = editor_surface.find_entity("beltlayer-buffer", entity.position)
   local underground_connector = editor_surface.find_entity(entity.name, entity.position)
   if buffer then
-    insert_container_inventory_to_buffer(above_container, buffer)
-    insert_container_inventory_to_buffer(below_container, buffer)
+    if not upgrade_in_progress_matches(entity) then
+      insert_container_inventory_to_buffer(above_container, buffer)
+      insert_container_inventory_to_buffer(below_container, buffer)
+    end
     insert_transport_lines_to_buffer(underground_connector, buffer)
   end
-  above_container.destroy()
-  below_container.destroy()
+  if not upgrade_in_progress_matches(entity) then
+    above_container.destroy()
+    below_container.destroy()
+  end
   underground_connector.destroy()
 end
 
@@ -333,6 +351,24 @@ function Editor:on_player_setup_blueprint(event)
       on_player_deconstructed_area(self, player, area, nil)
     end
   end
+end
+
+function Editor:on_put_item(event)
+  local player = game.players[event.player_index]
+  local stack = player.cursor_stack
+  if stack and stack.valid_for_read and is_connector_name(stack.name) then
+    local existing_entities =
+      player.surface.find_entities_filtered{position = event.position, type = "loader"}
+    for _, entity in pairs(existing_entities) do
+      if is_connector(entity) then
+        upgrade_in_progress = {
+          entity = entity,
+          tick = event.tick,
+        }
+      end
+    end
+  end
+  super.on_put_item(self, event)
 end
 
 return M
