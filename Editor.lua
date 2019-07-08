@@ -223,6 +223,18 @@ function Editor:on_robot_mined_entity(event)
   super.on_robot_mined_entity(self, event)
   local entity = event.entity
   if entity.valid and is_surface_connector(self, entity) then
+    if entity.to_be_upgraded() then
+      local inventory = event.robot and event.robot.get_inventory(defines.inventory.robot_cargo)
+      local contents = inventory and inventory.get_contents()
+      for name in pairs(contents) do
+        if is_connector_name(name) then
+          upgrade_in_progress = {
+            tick = event.tick,
+            entity = entity,
+          }
+        end
+      end
+    end
     on_mined_surface_connector(self, entity, event.buffer)
   end
 end

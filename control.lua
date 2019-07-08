@@ -29,8 +29,10 @@ end
 local event_handlers = {
   on_built_entity                  = function(event) editor:on_built_entity(event)                  end,
   on_cancelled_deconstruction      = function(event) editor:on_cancelled_deconstruction(event)      end,
+  on_cancelled_upgrade             = function(event) editor:on_cancelled_upgrade(event)             end,
   on_entity_died                   = function(event) editor:on_entity_died(event)                   end,
   on_marked_for_deconstruction     = function(event) editor:on_marked_for_deconstruction(event)     end,
+  on_marked_for_upgrade            = function(event) editor:on_marked_for_upgrade(event)            end,
   on_player_deconstructed_area     = function(event) editor:on_player_deconstructed_area(event)     end,
   on_player_main_inventory_changed = function(event) editor:on_player_main_inventory_changed(event) end,
   on_player_mined_entity           = function(event) editor:on_player_mined_entity(event)           end,
