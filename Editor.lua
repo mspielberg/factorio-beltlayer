@@ -100,6 +100,7 @@ local function on_built_surface_connector(self, creator, entity, stack)
     return
   end
 
+  underground_connector.last_user = entity.last_user
   underground_connector.minable = false
 
   -- create buffer containers
