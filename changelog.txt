@@ -1,4 +1,15 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.4.0
+Date: 08.07.2019
+  Changes:
+    - It is now possible to build splitters on underground belt layers.
+    - Fast replacing connectors no longer dumps the entire buffer into the player's inventory.
+  Bugfixes:
+    - Fix some cases where multiple blueprint ghosts could be created on the surface when deconstructing underground belt.
+  Compatibility:
+    - Add support for Space Exploration.  You can now build underground belt layers on planets and moons, but not in orbit or deep space.
+    - Add support for 0.17 upgrade planner tool.
+---------------------------------------------------------------------------------------------------
 Version: 0.3.2
 Date: 06.07.2019
   Bugfixes:
