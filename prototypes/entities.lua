@@ -43,6 +43,12 @@ local function make_connector(ug)
   loader.belt_distance = 0
   loader.next_upgrade = loader.next_upgrade and loader.next_upgrade .. "-beltlayer-connector"
 
+  if mods["space-exploration"] then
+    loader.collision_mask = loader.collision_mask
+      or { "floor-layer", "object-layer", "water-tile" }
+    table.insert(loader.collision_mask, space_collision_layer)
+  end
+
   return loader
 end
 
