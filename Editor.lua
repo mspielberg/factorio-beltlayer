@@ -340,6 +340,30 @@ function Editor:on_marked_for_deconstruction(event)
   end
 end
 
+function Editor:on_marked_for_upgrade(event)
+  local entity = event.entity
+  if is_connector(entity) then
+    local surface = self:counterpart_surface(entity.surface)
+    local counterpart = surface and surface.find_entity(entity.name, entity.position)
+    if counterpart then
+      counterpart.order_upgrade{force = counterpart.force, player = event.player_index, target = event.target}
+    end
+  end
+  super.on_marked_for_upgrade(self, event)
+end
+
+function Editor:on_cancelled_upgrade(event)
+  local entity = event.entity
+  if is_connector(entity) then
+    local surface = self:counterpart_surface(entity.surface)
+    local counterpart = surface and surface.find_entity(entity.name, entity.position)
+    if counterpart then
+      counterpart.cancel_upgrade(counterpart.force, event.player_index)
+    end
+  end
+  super.on_cancelled_upgrade(self, event)
+end
+
 function Editor:on_pre_ghost_deconstructed(event)
   local ghost = event.ghost
   if is_connector_name(ghost.ghost_name) and self:is_valid_aboveground_surface(ghost.surface) then
