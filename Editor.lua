@@ -133,7 +133,7 @@ function Editor:on_built_entity(event)
   super.on_built_entity(self, event)
   if not entity.valid then return end
 
-  local player = game.players[event.player_index]
+  local player = event.player_index and game.players[event.player_index]
   local stack = event.stack
   local surface = entity.surface
 
@@ -151,6 +151,11 @@ function Editor:script_raised_built(event)
   if entity and entity.name == "entity-ghost" then
     super.on_built_entity(self, event)
   end
+end
+
+function Editor:script_raised_revive(event)
+  event.created_entity = event.entity
+  self:on_built_entity(event)
 end
 
 function Editor:on_robot_built_entity(event)

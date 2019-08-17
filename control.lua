@@ -46,6 +46,7 @@ local event_handlers = {
   on_robot_mined_entity            = function(event) editor:on_robot_mined_entity(event)            end,
   on_runtime_mod_setting_changed   = on_runtime_mod_setting_changed,
   script_raised_built              = function(event) editor:script_raised_built(event)              end,
+  script_raised_revive             = function(event) editor:script_raised_revive(event)             end,
 }
 
 local function on_configuration_changed(data)
