@@ -153,6 +153,10 @@ function Editor:script_raised_built(event)
   end
 end
 
+function Editor:script_raised_destroy(event)
+  self:on_player_mined_entity(event)
+end
+
 function Editor:script_raised_revive(event)
   event.created_entity = event.entity
   self:on_built_entity(event)
