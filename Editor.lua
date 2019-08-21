@@ -176,22 +176,6 @@ function Editor:on_built_entity(event)
   end
 end
 
-function Editor:script_raised_built(event)
-  local entity = event.created_entity
-  if entity and entity.name == "entity-ghost" then
-    super.on_built_entity(self, event)
-  end
-end
-
-function Editor:script_raised_destroy(event)
-  self:on_player_mined_entity(event)
-end
-
-function Editor:script_raised_revive(event)
-  event.created_entity = event.entity
-  self:on_built_entity(event)
-end
-
 function Editor:on_robot_built_entity(event)
   local entity = event.created_entity
   if not entity.valid then return end
@@ -319,13 +303,11 @@ end
 -- Set whenever a constructor ghost is deconstructed, e.g. by deconstruction tool,
 -- so we can decide whether to deconstruct underground also.
 local previous_connector_ghost_deconstruction_tick
-local previous_connector_ghost_deconstruction_player_index
 
 local function on_player_deconstructed_surface_area(self, player, area, tool)
   local aboveground_surface = player.surface
   if not connector_in_area(aboveground_surface, area) and
-     (player.index ~= previous_connector_ghost_deconstruction_player_index or
-     game.tick ~= previous_connector_ghost_deconstruction_tick) then
+     game.tick ~= previous_connector_ghost_deconstruction_tick then
     -- no connectors present, and no connector ghosts deconstructed this tick by this player
     return
   end
@@ -409,7 +391,6 @@ function Editor:on_pre_ghost_deconstructed(event)
     -- connector ghost deconstructed, so if this is the result of a deconstruction tool,
     -- we want to deconstruct underground too, but by the time on_player_deconstructed_area is raised
     -- there will be no ghosts, and if there were only ghosts we need to keep track of that fact.
-    previous_connector_ghost_deconstruction_player_index = event.player_index
     previous_connector_ghost_deconstruction_tick = event.tick
   end
   super.on_pre_ghost_deconstructed(self, event)
@@ -444,6 +425,25 @@ function Editor:on_put_item(event)
     end
   end
   super.on_put_item(self, event)
+end
+
+function Editor:script_raised_built(event)
+  local entity = event.created_entity
+  if entity and entity.name == "entity-ghost" then
+    super.on_built_entity(self, event)
+  end
+end
+
+function Editor:script_raised_destroy(event)
+  if is_surface_connector(self, event.entity) then
+    previous_connector_ghost_deconstruction_tick = event.tick
+  end
+  self:on_player_mined_entity(event)
+end
+
+function Editor:script_raised_revive(event)
+  event.created_entity = event.entity
+  self:on_built_entity(event)
 end
 
 return M
