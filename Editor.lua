@@ -182,8 +182,12 @@ function Editor:on_robot_built_entity(event)
   super.on_robot_built_entity(self, event)
   if not entity.valid then return end
 
-  if is_surface_connector(self, entity) then
-    on_built_surface_connector(self, event.robot, entity, event.stack)
+  if is_connector(entity) then
+    if self:is_valid_aboveground_surface(entity.surface) then
+      on_built_surface_connector(self, event.robot, entity, event.stack)
+    else
+      self.abort_build(event.robot, entity, event.stack, {"beltlayer-error.bad-surface-for-connector"})
+    end
   end
 end
 
