@@ -127,22 +127,52 @@ local function on_built_surface_connector(self, creator, entity, stack)
   Connector.new(entity, above_container, below_container)
 end
 
+local function re_place_belt(surface, position)
+  local belt = surface.find_entities_filtered{
+    position = position,
+    type = "transport-belt",
+  }[1]
+  if not belt then return end
+
+  local name = belt.name
+  local surface = belt.surface
+  local position = belt.position
+  local direction = belt.direction
+  local force = belt.force
+  local intermediate_name = name == "transport-belt" and "fast-transport-belt" or "transport-belt"
+  local args = {
+    name = intermediate_name,
+    position = position,
+    direction = direction,
+    force = force,
+    fast_replace = true,
+    spill = false,
+    create_build_effect_smoke = false,
+  }
+  surface.create_entity(args)
+  args.name = name
+  surface.create_entity(args)
+end
+
 function Editor:on_built_entity(event)
   local entity = event.created_entity
   if not entity.valid then return end
+  local surface = entity.surface
+  local position = entity.position
+  local was_belt_proxy = entity.name:find("^beltlayer%-bpproxy%-")
   super.on_built_entity(self, event)
-  if not entity.valid then return end
 
   local player = event.player_index and game.players[event.player_index]
   local stack = event.stack
-  local surface = entity.surface
 
-  if is_connector(entity) then
-    if self:is_valid_aboveground_surface(surface) then
+  if entity.valid and is_connector(entity) then
+    if self:is_valid_aboveground_surface(entity.surface) then
       on_built_surface_connector(self, player, entity, stack)
     else
       self.abort_build(player, entity, stack, {"beltlayer-error.bad-surface-for-connector"})
     end
+  elseif was_belt_proxy then
+    re_place_belt(surface, position)
   end
 end
 
