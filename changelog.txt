@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.4.8
+Date: 13.01.2020
+  Bugfixes:
+    - Fix that placing items in the editor view would consume two items. (https://mods.factorio.com/mod/beltlayer/discussion/5e1be7a0e60b78000b2d9135)
+---------------------------------------------------------------------------------------------------
 Version: 0.4.7
 Date: 16.09.2019
   Bugfixes:
