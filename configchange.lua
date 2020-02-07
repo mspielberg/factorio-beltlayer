@@ -127,4 +127,15 @@ add_migration{
   end,
 }
 
+add_migration{
+  name = "v0_5_0_add_blueprint_items_to_editor",
+  version = {0,5,0},
+  task = function()
+    global.editor.valid_editor_types = {
+      "blueprint", "blueprint-book", "deconstruction-item", "upgrade-item",
+      "splitter", "transport-belt", "underground-belt",
+    }
+  end,
+}
+
 return M

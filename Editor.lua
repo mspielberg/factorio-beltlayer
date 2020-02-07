@@ -9,7 +9,10 @@ setmetatable(Editor, { __index = super })
 
 function M.new()
   local self = BaseEditor.new("beltlayer")
-  self.valid_editor_types = { "transport-belt", "underground-belt", "splitter" }
+  self.valid_editor_types = {
+    "blueprint", "blueprint-book", "deconstruction-item", "upgrade-item",
+    "transport-belt", "underground-belt", "splitter",
+  }
   return M.restore(self)
 end
 
