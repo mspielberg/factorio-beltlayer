@@ -94,7 +94,7 @@ add_migration{
   task = function()
     for surface_name, s in pairs(game.surfaces) do
       for _, entity in pairs(s.find_entities_filtered{name = "beltlayer-buffer"}) do
-        entity.get_inventory(defines.inventory.chest).setbar()
+        entity.get_inventory(defines.inventory.chest).set_bar()
       end
     end
   end,

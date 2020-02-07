@@ -1,17 +1,18 @@
 require "util"
 
 local overlay_icon = {
-  icon = "__core__/graphics/icons/collapse.png",
+  icon = "__core__/graphics/icons/mip/collapse.png",
   icon_size = 32,
+  icon_mipmaps = 2,
   scale = 0.5,
-  shift = {8, -8},
+  shift = {-8, -8},
   tint = {r=1,g=.7,b=0},
 }
 
 local function make_item(proto)
   local item = util.table.deepcopy(proto)
   item.name = item.name.."-beltlayer-connector"
-  item.localised_name = data.raw["loader"][item.name].localised_name
+  item.localised_name = data.raw["loader-1x1"][item.name].localised_name
   item.place_result = item.name
   if item.icons then
     table.insert(item.icons, overlay_icon)

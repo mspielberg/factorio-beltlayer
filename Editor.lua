@@ -84,7 +84,7 @@ local function on_built_surface_connector(self, creator, entity, stack)
   local editor_surface = self:editor_surface_for_aboveground_surface(entity.surface)
   -- check for existing underground connector ghost
   local underground_ghost = editor_surface.find_entity("entity-ghost", position)
-  if underground_ghost and underground_ghost.ghost_type == "loader" then
+  if underground_ghost and underground_ghost.ghost_type == "loader-1x1" then
     direction = underground_ghost.direction
     loader_type = underground_ghost.loader_type
     entity.loader_type = opposite_type(loader_type)
@@ -421,7 +421,7 @@ function Editor:on_put_item(event)
   local stack = player.cursor_stack
   if stack and stack.valid_for_read and is_connector_name(stack.name) then
     local existing_entities =
-      player.surface.find_entities_filtered{position = event.position, type = "loader"}
+      player.surface.find_entities_filtered{position = event.position, type = "loader-1x1"}
     for _, entity in pairs(existing_entities) do
       if is_connector(entity) then
         upgrade_in_progress = {
