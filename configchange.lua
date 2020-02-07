@@ -41,6 +41,25 @@ add_migration{
 }
 
 add_migration{
+  name = "v0_5_0_reattach_loaders",
+  version = {0,5,0},
+  task = function()
+    for key, connector in pairs(global.all_connectors) do
+      local inv = connector.above_inv
+      if not connector.above_loader.valid and inv.valid then
+        local surface = inv.entity_owner.surface
+        local position = inv.entity_owner.position
+        connector.above_loader = surface.find_entities_filtered{
+          type = "loader-1x1",
+          position = position,
+        }[1]
+        log("reset loader reference at "..serpent.line(position).." on "..surface.name)
+      end
+    end
+  end,
+}
+
+add_migration{
   name = "v0_2_2_remove_invalid_connectors",
   version = {0,2,2},
   task = function()
@@ -48,6 +67,7 @@ add_migration{
       if connector:valid() then
         connector.id = key
       else
+        log("Connector "..serpent.block(connector).." is not valid. Removing.")
         global.all_connectors[key] = nil
       end
     end
