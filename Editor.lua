@@ -394,6 +394,7 @@ end
 
 function Editor:on_pre_ghost_deconstructed(event)
   local ghost = event.ghost
+  if ghost.name ~= "entity-ghost" then return end
   if is_connector_name(ghost.ghost_name) and self:is_valid_aboveground_surface(ghost.surface) then
     -- connector ghost deconstructed, so if this is the result of a deconstruction tool,
     -- we want to deconstruct underground too, but by the time on_player_deconstructed_area is raised
