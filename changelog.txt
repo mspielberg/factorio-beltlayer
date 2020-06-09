@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.5.2
 Date: ????
-  Changes:
+  Bugfixes:
+    - Try to fix desync by controlling connector update order within a tick. (https://mods.factorio.com/mod/beltlayer/discussion/5ed9f9451d9958000c05c19d)
 ---------------------------------------------------------------------------------------------------
 Version: 0.5.1
 Date: 15.03.2020
