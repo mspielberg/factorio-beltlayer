@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.6.0
-Date: 2020-07-16
+Date: 2020-07-17
   Changes:
     - The representation of construction proxies has changed. If you have any outstanding construction orders for underground belt entities (build from ghosts, deconstruction, upgrade), you should finish or cancel them before upgrading.
   Bugfixes:
