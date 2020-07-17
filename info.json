@@ -4,7 +4,7 @@
   "description": "Route your belts freely underground.",
   "factorio_version": "0.18",
   "author": "Therax",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "dependencies": [
     "? boblogistics"
   ],
