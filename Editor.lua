@@ -70,16 +70,29 @@ end
 
 function Editor:proxy_name(entity)
   local entity_name = entity.type == "entity-ghost" and entity.ghost_name or entity.name
-  return util.proxy_name(entity_name, entity.direction, entity.type == "underground-belt" and entity.belt_to_ground_type)
+  return util.proxy_name(entity_name, entity.type == "underground-belt" and entity.belt_to_ground_type)
 end
 
 function Editor:nonproxy_name(entity)
-  local pattern = "^"..self.name.."%-.*%-bpproxy%-"
+  local pattern = "^"..self.name..".*%-bpproxy%-"
   local _, last = entity.name:find(pattern)
   if last then
     return entity.name:sub(last + 1)
   end
   return nil
+end
+
+function Editor:create_entity_args_for_editor_entity(bpproxy)
+  local create_args = super.create_entity_args_for_editor_entity(self, bpproxy)
+  local name = bpproxy.name
+  if name == "entity-ghost" then name = bpproxy.ghost_name end
+  local type, nonproxy_name =
+    name:match("^beltlayer%-([^-]*)%-?bpproxy%-(.*)$")
+  if not type then return create_args end
+  create_args.direction = bpproxy.direction
+  create_args.type = type
+  create_args.name = nonproxy_name
+  return create_args
 end
 
 local function surface_counterpart(self, entity)

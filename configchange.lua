@@ -138,4 +138,48 @@ add_migration{
   end,
 }
 
+add_migration{
+  name = "v0_5_3_change_simple_entity_with_owner",
+  version = {0,5,3},
+  task = function()
+    local reverse_direction = {}
+    for k, v in pairs(defines.direction) do
+      reverse_direction[v] = k
+    end
+
+    local function new_proxy_name(entity)
+      local direction = entity.direction
+      if entity.type == "transport-belt" or entity.type == "splitter" then
+        return "beltlayer-"..reverse_direction[direction]..entity.name:sub(#"beltlayer" + 1)
+      elseif entity.type == "underground-belt" then
+        return "beltlayer-"..reverse_direction[direction].."-"..
+          entity.belt_to_ground_type..entity.name:sub(#"beltlayer" + 1)
+      end
+    end
+
+    local editor = global.editor
+    local prototypes_by_name = game.get_filtered_entity_prototypes{{filter="transport-belt-connectable"}}
+    local prototype_names = {}
+    for name in pairs(prototypes_by_name) do
+      if not name:find("^beltlayer%-bpproxy%-") then
+        prototype_names[#prototype_names + 1] = name
+      end
+    end
+
+    for _, surface in pairs(game.surfaces) do
+      if editor:editor_surface_for_aboveground_surface(surface) then
+        for _, entity in pairs(surface.find_entities_filtered{name = prototype_names}) do
+          entity.surface.create_entity{
+            name = new_proxy_name(entity),
+            position = entity.position,
+            force = entity.force,
+            player = entity.last_user,
+          }
+          entity.destroy()
+        end
+      end
+    end
+  end,
+}
+
 return M
