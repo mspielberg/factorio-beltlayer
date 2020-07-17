@@ -138,4 +138,42 @@ add_migration{
   end,
 }
 
+add_migration{
+  name = "v0_6_0_change_bpproxies_to_constant_combinator",
+  version = {0,6,0},
+  task = function()
+    local editor = global.editor
+    local prototypes_by_name = game.get_filtered_entity_prototypes{{filter = "transport-belt-connectable"}}
+    local prototype_names = {}
+    for name in pairs(prototypes_by_name) do
+      if name:find("^beltlayer%-bpproxy%-") then
+        prototype_names[#prototype_names + 1] = name
+      end
+    end
+
+    local function new_proxy_name(entity)
+      return "beltlayer-"..entity.belt_to_ground_type..entity.name:sub(#"beltlayer-")
+    end
+
+    for _, surface in pairs(game.surfaces) do
+      if editor:editor_surface_for_aboveground_surface(surface) then
+        for _, entity in pairs(surface.find_entities_filtered{name = prototype_names}) do
+          entity.order_deconstruction(entity.force, entity.last_user)
+          if entity.type == "underground-belt" then
+            local new_bpproxy = entity.surface.create_entity{
+              name = new_proxy_name(entity),
+              position = entity.position,
+              direction = entity.direction,
+              force = entity.force,
+              player = entity.last_user,
+            }
+            new_bpproxy.order_deconstruction(entity.force, entity.last_user)
+            entity.destroy()
+          end
+        end
+      end
+    end
+  end,
+}
+
 return M
