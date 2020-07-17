@@ -1,7 +1,10 @@
 ---------------------------------------------------------------------------------------------------
-Version: 0.5.3
-Date: ????
+Version: 0.6.0
+Date: 2020-07-16
   Changes:
+    - The representation of construction proxies has changed. If you have any outstanding construction orders for underground belt entities (build from ghosts, deconstruction, upgrade), you should finish or cancel them before upgrading.
+  Bugfixes:
+    - Fix crash when marking an underground belt for deconstruction and there is already a belt directly above. (https://mods.factorio.com/mod/beltlayer/discussion/5f0b97b1657c00e84f13f098)
 ---------------------------------------------------------------------------------------------------
 Version: 0.5.2
 Date: 2020-06-09
