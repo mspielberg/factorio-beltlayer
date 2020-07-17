@@ -1,5 +1,6 @@
 local BaseEditor = require "lualib.BaseEditor.BaseEditor"
 local Connector = require "Connector"
+local util = require "util"
 
 local M = {}
 
@@ -67,12 +68,39 @@ local function opposite_type(loader_type)
   return "input"
 end
 
-local function surface_counterpart(entity)
+function Editor:proxy_name(entity)
+  local entity_name = entity.type == "entity-ghost" and entity.ghost_name or entity.name
+  return util.proxy_name(entity_name, entity.type == "underground-belt" and entity.belt_to_ground_type)
+end
+
+function Editor:nonproxy_name(entity)
+  local pattern = "^"..self.name..".*%-bpproxy%-"
+  local _, last = entity.name:find(pattern)
+  if last then
+    return entity.name:sub(last + 1)
+  end
+  return nil
+end
+
+function Editor:create_entity_args_for_editor_entity(bpproxy)
+  local create_args = super.create_entity_args_for_editor_entity(self, bpproxy)
+  local name = bpproxy.name
+  if name == "entity-ghost" then name = bpproxy.ghost_name end
+  local type, nonproxy_name =
+    name:match("^beltlayer%-([^-]*)%-?bpproxy%-(.*)$")
+  if not type then return create_args end
+  create_args.direction = bpproxy.direction
+  create_args.type = type
+  create_args.name = nonproxy_name
+  return create_args
+end
+
+local function surface_counterpart(self, entity)
   local editor_surface = self:editor_surface_for_aboveground_surface(entity.surface)
   if is_connector(entity) then
     return editor_surface.find_entity(entity.name, entity.position)
   end
-  return editor_surface.find_entity("beltlayer-bpproxy-"..name, entity.position)
+  return editor_surface.find_entity(self:proxy_name(entity), entity.position)
 end
 
 local function on_built_surface_connector(self, creator, entity, stack)
@@ -331,7 +359,7 @@ local function on_player_deconstructed_underground_area(self, player, area, tool
   local underground_entities = self:order_underground_deconstruction(player, editor_surface, area, tool)
   for _, entity in ipairs(underground_entities) do
     if is_connector(entity) then
-      local counterpart = surface_counterpart(entity)
+      local counterpart = surface_counterpart(self, entity)
       if counterpart then
         entity.order_deconstruction(player.force, player)
       end
