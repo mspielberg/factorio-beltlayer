@@ -131,12 +131,17 @@ local function make_splitter_proxy_sprites(belt_animation_set, structure, struct
     local belt_sprite_r = deepcopy(belt_sprite_l)
     belt_sprite_l.shift = add_shift(belt_sprite_l.shift, rotated_point({-0.5, 0}, direction))
     belt_sprite_r.shift = add_shift(belt_sprite_r.shift, rotated_point({ 0.5, 0}, direction))
-    out[direction] = { layers = {
-      belt_sprite_l,
-      belt_sprite_r,
-      deepcopy(structure_patch[direction]),
-      deepcopy(structure[direction]),
-    } }
+
+    out[direction] = {
+      layers = {
+        belt_sprite_l,
+        belt_sprite_r,
+        deepcopy(structure[direction]),
+      }
+    }
+    if structure_patch then
+      table.insert(out[direction].layers, 3, deepcopy(structure_patch[direction]))
+    end
   end
   return out
 end

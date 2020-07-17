@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.6.1
 Date: ????
-  Changes:
+  Bugfixes:
+    - Fix crash on startup with Ultimate Belts. (https://mods.factorio.com/mod/beltlayer/discussion/5f11917b3b109923da214fa9)
 ---------------------------------------------------------------------------------------------------
 Version: 0.6.0
 Date: 2020-07-17
