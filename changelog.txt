@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.6.2
 Date: ????
-  Changes:
+  Bugfixes:
+    - Fix crash when blueprinting underground belts in the editor. (https://mods.factorio.com/mod/beltlayer/discussion/5f15aec85fbfa080721ff015)
 ---------------------------------------------------------------------------------------------------
 Version: 0.6.1
 Date: 2020-07-17
