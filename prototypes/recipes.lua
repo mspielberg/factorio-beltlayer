@@ -5,10 +5,11 @@ local function find_underground_belt_result(recipe)
     if root then
       local results = root.results or {{name = root.result}}
       for _, result in ipairs(results) do
-        local item = data.raw.item[result.name]
+        local item_name = result.name or result[1]
+        local item = data.raw.item[item_name]
         if item and item.place_result then
           if data.raw["underground-belt"][item.place_result] then
-            return result.name
+            return item_name
           end
         end
       end
@@ -31,18 +32,18 @@ local function make_recipe(proto, base_result)
       end
 
       local count
-      if root.result == base_result then
+      if root.results then
+        for i, result in ipairs(root.results) do
+          local item_name = result.name or result[1]
+          if item_name == base_result then
+            count = result.amount or result[2]
+            root.results[i] = {name = connector_item, amount = 1}
+          end
+        end
+      elseif root.result == base_result then
         root.result = connector_item
         count = root.result_count
         root.result_count = nil
-      elseif root.results then
-        for i, result in ipairs(root.results) do
-          if result.name == base_result then
-            result.name = connector_item
-            count = result.amount
-            result.amount = 1
-          end
-        end
       end
 
       count = count or 1
