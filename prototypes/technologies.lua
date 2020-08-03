@@ -1,16 +1,16 @@
 local function find_underground_belt_result(recipe)
   for _, root in ipairs{recipe, recipe.normal, recipe.expensive} do
     if root then
-      if root.result then
-        if data.raw["underground-belt"][root.result] then
-          return root.result
-        end
-      elseif root.results then
+      if root.results then
         for _, result in ipairs(root.results) do
           local name = result.name or result[1]
           if data.raw["underground-belt"][name] then
             return name
           end
+        end
+      elseif root.result then
+        if data.raw["underground-belt"][root.result] then
+          return root.result
         end
       end
     end

@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.6.3
 Date: ????
-  Changes:
+  Bugfixes:
+    - Fix crash when other mods create underground belt recipes with both `results` and `result`. (https://github.com/mspielberg/factorio-beltlayer/issues/4)
 ---------------------------------------------------------------------------------------------------
 Version: 0.6.2
 Date: 2020-07-20
