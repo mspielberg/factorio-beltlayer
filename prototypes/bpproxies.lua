@@ -62,8 +62,10 @@ local function make_transport_belt_proxy(proto)
   return proxy_proto
 end
 
-for _, proto in pairs(data.raw["transport-belt"]) do
-  data:extend{make_transport_belt_proxy(proto)}
+for name, proto in pairs(data.raw["transport-belt"]) do
+  if not name:find("^replicating%-") then
+    data:extend{make_transport_belt_proxy(proto)}
+  end
 end
 
 local underground_belt_sprite_index = {
