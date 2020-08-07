@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.6.4
 Date: ????
-  Changes:
+  Bugfixes:
+    - Fix crash when building from blueprint books in Factorio 0.37+. (https://mods.factorio.com/mod/beltlayer/discussion/5f29145a65b26e54076cef6b)
 ---------------------------------------------------------------------------------------------------
 Version: 0.6.3
 Date: 2020-08-03
