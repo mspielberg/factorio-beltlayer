@@ -8,12 +8,15 @@ local function extract_sprites_from_animation_set(belt_animation_set)
   local out = {}
   for direction in pairs(DEFAULT_INDEXES) do
     local index = belt_animation_set[direction.."_index"] or DEFAULT_INDEXES[direction]
-    local sprite = deepcopy(belt_animation_set.animation_set)
-    sprite.y = sprite.height * (index - 1)
-    if sprite.hr_version then
-      sprite.hr_version.y = sprite.hr_version.height * (index - 1)
+    local layers = belt_animation_set.animation_set.layers or {belt_animation_set.animation_set}
+    local layer_set = deepcopy(layers)
+    for _, layer in pairs(layer_set) do
+      layer.y = layer.height * (index - 1)
+      if layer.hr_version then
+        layer.hr_version.y = layer.hr_version.height * (index - 1)
+      end
     end
-    out[direction] = sprite
+    out[direction] = { layers = layers }
   end
   return out
 end
@@ -92,14 +95,21 @@ local function make_underground_belt_sprites(proto, belt_to_ground_type)
   local belt_sprites = extract_belt_sprites(proto)
   for direction in pairs(DEFAULT_INDEXES) do
     local belt_sprite = belt_sprites[direction]
-    local structure_sprite = deepcopy(proto.structure["direction_"..(belt_to_ground_type == "input" and "in" or "out")].sheet)
-    structure_sprite.x =
-      structure_sprite.width * (underground_belt_sprite_index[belt_to_ground_type][direction] - 1)
-    if structure_sprite.hr_version then
-      structure_sprite.hr_version.x =
-        structure_sprite.hr_version.width * (underground_belt_sprite_index[belt_to_ground_type][direction] - 1)
+    local structure_sprite = deepcopy(proto.structure["direction_"..(belt_to_ground_type == "input" and "in" or "out")])
+    local structure_sheets = structure_sprite.sheets or { structure_sprite.sheet }
+    for _, sheet in pairs(structure_sheets) do
+      sheet.x =
+        sheet.width * (underground_belt_sprite_index[belt_to_ground_type][direction] - 1)
+      if sheet.hr_version then
+        sheet.hr_version.x =
+          sheet.hr_version.width * (underground_belt_sprite_index[belt_to_ground_type][direction] - 1)
+      end
     end
-    out[direction] = { layers = { belt_sprite, structure_sprite } }
+    local layers = deepcopy(belt_sprite.layers)
+    for i = 1, #structure_sheets do
+      layers[#belt_sprite + i] = structure_sheets[i]
+    end
+    out[direction] = { layers = layers }
   end
   return out
 end
