@@ -1,9 +1,10 @@
 local add_shift = util.add_shift
 local deepcopy = util.table.deepcopy
+local merge = util.merge
 local util = require "util"
 
 local DEFAULT_INDEXES = { east = 1, west = 2, north = 3, south = 4, }
-local function extract_sprites(belt_animation_set)
+local function extract_sprites_from_animation_set(belt_animation_set)
   local out = {}
   for direction in pairs(DEFAULT_INDEXES) do
     local index = belt_animation_set[direction.."_index"] or DEFAULT_INDEXES[direction]
@@ -15,6 +16,18 @@ local function extract_sprites(belt_animation_set)
     out[direction] = sprite
   end
   return out
+end
+
+local function extract_belt_sprites(proto)
+  if proto.belt_animation_set then
+    return extract_sprites_from_animation_set(proto.belt_animation_set)
+  end
+  return {
+    north = proto.belt_vertical,
+    east = proto.belt_horizontal,
+    south = merge{proto.belt_vertical, { scale = -1 }},
+    west = merge{proto.belt_horizontal, { scale = -1 }},
+  }
 end
 
 local function make_placeable_by(entity_proto)
@@ -56,7 +69,7 @@ local function make_transport_belt_proxy(proto)
   proxy_proto.flags = {"player-creation"}
   proxy_proto.fast_replaceable_group = proto.fast_replaceable_group
   proxy_proto.next_upgrade = proto.next_upgrade and util.proxy_name(proto.next_upgrade)
-  proxy_proto.sprites = extract_sprites(proto.belt_animation_set)
+  proxy_proto.sprites = extract_belt_sprites(proto)
   proxy_proto.placeable_by = make_placeable_by(proto)
   add_tint(proxy_proto, {r = 0.5, g = 0.5, b = 0.8, a = 0.25})
   return proxy_proto
@@ -72,16 +85,18 @@ local underground_belt_sprite_index = {
   input = { north = 1, east = 2, south = 3, west = 4 },
   output = { north = 3, east = 4, south = 1, west = 2 },
 }
-local function make_underground_belt_sprites(belt_animation_set, structure, belt_to_ground_type)
+local function make_underground_belt_sprites(proto, belt_to_ground_type)
   local out = {}
-  local belt_sprites = extract_sprites(belt_animation_set)
+  local belt_sprites = extract_belt_sprites(proto)
   for direction in pairs(DEFAULT_INDEXES) do
     local belt_sprite = belt_sprites[direction]
-    local structure_sprite = deepcopy(structure["direction_"..(belt_to_ground_type == "input" and "in" or "out")].sheet)
+    local structure_sprite = deepcopy(proto.structure["direction_"..(belt_to_ground_type == "input" and "in" or "out")].sheet)
     structure_sprite.x =
       structure_sprite.width * (underground_belt_sprite_index[belt_to_ground_type][direction] - 1)
-    structure_sprite.hr_version.x =
-      structure_sprite.hr_version.width * (underground_belt_sprite_index[belt_to_ground_type][direction] - 1)
+    if structure_sprite.hr_version then
+      structure_sprite.hr_version.x =
+        structure_sprite.hr_version.width * (underground_belt_sprite_index[belt_to_ground_type][direction] - 1)
+    end
     out[direction] = { layers = { belt_sprite, structure_sprite } }
   end
   return out
@@ -101,7 +116,7 @@ local function make_underground_belt_proxies(proto)
     proxy_proto.fast_replaceable_group = proto.fast_replaceable_group
     proxy_proto.next_upgrade = proto.next_upgrade and util.proxy_name(proto.next_upgrade, belt_to_ground_type)
     proxy_proto.sprites =
-      make_underground_belt_sprites(proto.belt_animation_set, proto.structure, belt_to_ground_type)
+      make_underground_belt_sprites(proto, belt_to_ground_type)
     proxy_proto.placeable_by = make_placeable_by(proto)
     add_tint(proxy_proto, {r = 0.5, g = 0.5, b = 0.8, a = 0.25})
     out[#out+1] = proxy_proto
@@ -125,9 +140,9 @@ local function rotated_point(point, direction)
   end
 end
 
-local function make_splitter_proxy_sprites(belt_animation_set, structure, structure_patch)
+local function make_splitter_proxy_sprites(proto)
   local out = {}
-  local belt_sprites = extract_sprites(belt_animation_set)
+  local belt_sprites = extract_belt_sprites(proto)
   for direction in pairs(DEFAULT_INDEXES) do
     local belt_sprite_l = belt_sprites[direction]
     local belt_sprite_r = deepcopy(belt_sprite_l)
@@ -138,11 +153,11 @@ local function make_splitter_proxy_sprites(belt_animation_set, structure, struct
       layers = {
         belt_sprite_l,
         belt_sprite_r,
-        deepcopy(structure[direction]),
+        deepcopy(proto.structure[direction]),
       }
     }
-    if structure_patch then
-      table.insert(out[direction].layers, 3, deepcopy(structure_patch[direction]))
+    if proto.structure_patch then
+      table.insert(out[direction].layers, 3, deepcopy(proto.structure_patch[direction]))
     end
   end
   return out
@@ -158,7 +173,7 @@ local function make_splitter_proxy(proto)
   proxy_proto.collision_mask = {}
   proxy_proto.flags = {"player-creation"}
   proxy_proto.fast_replaceable_group = proto.fast_replaceable_group
-  proxy_proto.sprites = make_splitter_proxy_sprites(proto.belt_animation_set, proto.structure, proto.structure_patch)
+  proxy_proto.sprites = make_splitter_proxy_sprites(proto)
   proxy_proto.next_upgrade = proto.next_upgrade and util.proxy_name(proto.next_upgrade)
   proxy_proto.placeable_by = make_placeable_by(proto)
   add_tint(proxy_proto, {r = 0.5, g = 0.5, b = 0.8, a = 0.25})
