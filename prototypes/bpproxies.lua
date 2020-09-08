@@ -56,9 +56,10 @@ local function add_tint(proto, tint)
 end
 
 local function make_transport_belt_proxy(proto)
-  local sprites = {}
   local proxy_proto = deepcopy(data.raw["constant-combinator"]["constant-combinator"])
   proxy_proto.name = util.proxy_name(proto.name)
+  proxy_proto.icon = proto.icon
+  proxy_proto.icons = proto.icons
   proxy_proto.item_slot_count = 0
   proxy_proto.max_circuit_wire_distance = 0
   proxy_proto.localised_name = {"entity-name.beltlayer-bpproxy", proto.localised_name or {"entity-name."..proto.name}}
@@ -107,6 +108,8 @@ local function make_underground_belt_proxies(proto)
   for _, belt_to_ground_type in pairs{"input", "output"} do
     local proxy_proto = deepcopy(data.raw["constant-combinator"]["constant-combinator"])
     proxy_proto.name = util.proxy_name(proto.name, belt_to_ground_type)
+    proxy_proto.icon = proto.icon
+    proxy_proto.icons = proto.icons
     proxy_proto.localised_name = {"entity-name.beltlayer-bpproxy", proto.localised_name or {"entity-name."..proto.name}}
     proxy_proto.minable_properties = deepcopy(proto.minable_properties)
     proxy_proto.selection_box = deepcopy(proto.selection_box)
@@ -166,6 +169,8 @@ end
 local function make_splitter_proxy(proto)
   local proxy_proto = deepcopy(data.raw["constant-combinator"]["constant-combinator"])
   proxy_proto.name = util.proxy_name(proto.name)
+  proxy_proto.icon = proto.icon
+  proxy_proto.icons = proto.icons
   proxy_proto.localised_name = {"entity-name.beltlayer-bpproxy", proto.localised_name or {"entity-name."..proto.name}}
   proxy_proto.minable_properties = deepcopy(proto.minable_properties)
   proxy_proto.selection_box = deepcopy(proto.selection_box)
