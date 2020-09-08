@@ -1,7 +1,12 @@
 ---------------------------------------------------------------------------------------------------
-Version: 0.6.5
-Date: ????
-  Changes:
+Version: 1.0.0
+Date: 2020-09-08
+  Bugfixes:
+    - Fix crash on startup with other mods that use the older style of specifying belt sprites (e.g. 5Dim's Transport, Yuoki Industries - Engines, etc.). (https://mods.factorio.com/mod/beltlayer/discussion/5f3ff748e973e4e9082b5adf)
+    - Fix incorrect icons in deconstruction and upgrade planner configuration GUIs.
+    - Fix upgrading connectors with the Construction Drones mod. (https://mods.factorio.com/mod/beltlayer/discussion/5f43eb37315ec2c2776355f7)
+  Compatibility:
+    - Marked as incompatible with Belt brush pending a fix to that mod.
 ---------------------------------------------------------------------------------------------------
 Version: 0.6.4
 Date: 2020-08-07
