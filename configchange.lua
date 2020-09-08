@@ -3,6 +3,39 @@ local version = require "lualib.version"
 
 local M = {}
 
+local function remove_orphans()
+  Editor.restore(global.editor)
+  local affected_surfaces = 0
+  local removed_connectors = 0
+  for _, surface in pairs(game.surfaces) do
+    local did_remove_connector = false
+    local counterpart_surface = global.editor:counterpart_surface(surface)
+    if counterpart_surface then
+      for _, loader in pairs(surface.find_entities_filtered{type = "loader-1x1"}) do
+        if loader.name:find("%-beltlayer%-connector$") then
+          local position = loader.position
+          local counterpart_connector = counterpart_surface.find_entity(loader.name, position)
+          if not counterpart_connector then
+            local buffer = surface.find_entity("beltlayer-buffer", position)
+            if buffer then buffer.destroy() end
+            buffer = counterpart_surface.find_entity("beltlayer-buffer", position)
+            if buffer then buffer.destroy() end
+            loader.destroy()
+            removed_connectors = removed_connectors + 1
+            did_remove_connector = true
+          end
+        end
+      end
+    end
+    if did_remove_connector then
+      affected_surfaces = affected_surfaces + 1
+    end
+  end
+  if removed_connectors > 0 then
+    log("Removed "..removed_connectors.." orphan connector(s) on "..affected_surfaces.." surface(s).")
+  end
+end
+
 local all_migrations = {}
 
 local function add_migration(migration)
@@ -17,6 +50,7 @@ function M.on_mod_version_changed(old)
       migration.task()
     end
   end
+  remove_orphans()
 end
 
 add_migration{
