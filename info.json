@@ -6,7 +6,8 @@
   "author": "Therax",
   "version": "0.6.5",
   "dependencies": [
-    "? boblogistics"
+    "? boblogistics",
+    "! belt-brush <= 0.5.0"
   ],
   "package": {
     "ignore": ["resources/*"]
