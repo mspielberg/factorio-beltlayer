@@ -110,6 +110,26 @@ local function on_built_surface_connector(self, creator, entity, stack)
   local direction = entity.direction
   local loader_type = opposite_type(entity.loader_type)
   local editor_surface = self:editor_surface_for_aboveground_surface(entity.surface)
+
+  -- check for existing underground connector
+  local underground_connector = editor_surface.find_entities_filtered{position = position, type = "loader-1x1"}[1]
+  local belt_item_inventory
+  local left_tl_count
+  if underground_connector then
+    local left_tl = underground_connector.get_transport_line(defines.transport_line.left_line)
+    left_tl_count = #left_tl
+    local right_tl = underground_connector.get_transport_line(defines.transport_line.right_line)
+    belt_item_inventory = game.create_inventory(#left_tl + #right_tl)
+    for i = 1, left_tl_count do
+      belt_item_inventory[i].set_stack(left_tl[i])
+    end
+    for i = 1, #right_tl do
+      belt_item_inventory[left_tl_count + i].set_stack(right_tl[i])
+    end
+    underground_connector.destroy()
+    underground_connector = nil
+  end
+
   -- check for existing underground connector ghost
   local underground_ghost = editor_surface.find_entity("entity-ghost", position)
   if underground_ghost and underground_ghost.ghost_type == "loader-1x1" then
@@ -133,6 +153,23 @@ local function on_built_surface_connector(self, creator, entity, stack)
 
   underground_connector.last_user = entity.last_user
   underground_connector.minable = false
+
+  -- replace items if needed
+  if belt_item_inventory then
+    local position = 0.99
+    local left_tl = underground_connector.get_transport_line(defines.transport_line.left_line)
+    for i = 1, left_tl_count do
+      left_tl.insert_at(position, belt_item_inventory[i])
+      position = position - 0.01
+    end
+    position = 0.99
+    local right_tl = underground_connector.get_transport_line(defines.transport_line.right_line)
+    for i = left_tl_count + 1, #belt_item_inventory do
+      right_tl.insert_at(position, belt_item_inventory[i])
+      position = position - 0.01
+    end
+    belt_item_inventory.destroy()
+  end
 
   -- create buffer containers
   local above_container = entity.surface.find_entity("beltlayer-buffer", position)
@@ -464,10 +501,8 @@ function Editor:on_put_item(event)
 end
 
 function Editor:script_raised_built(event)
-  local entity = event.created_entity
-  if entity and entity.name == "entity-ghost" then
-    super.on_built_entity(self, event)
-  end
+  event.created_entity = event.entity
+  return self:on_built_entity(event)
 end
 
 function Editor:script_raised_destroy(event)
