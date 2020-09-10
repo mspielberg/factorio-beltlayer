@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.1
+Date: 2020-09-09
+  Bugfixes:
+    - Fix crash on startup due to missing icon_size. (https://mods.factorio.com/mod/beltlayer/discussion/5f58e93537b59eef7dac5b1e)
+---------------------------------------------------------------------------------------------------
 Version: 1.0.0
 Date: 2020-09-08
   Bugfixes:
