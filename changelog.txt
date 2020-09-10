@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.2
+Date: 2020-09-10
+  Bugfixes:
+    - Fix crash on startup in Space Exploration. (https://mods.factorio.com/mod/beltlayer/discussion/5f582203a10d5bdfa0de34d6)
+---------------------------------------------------------------------------------------------------
 Version: 1.0.1
 Date: 2020-09-09
   Bugfixes:
