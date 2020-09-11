@@ -8,15 +8,15 @@ local function extract_sprites_from_animation_set(belt_animation_set)
   local out = {}
   for direction in pairs(DEFAULT_INDEXES) do
     local index = belt_animation_set[direction.."_index"] or DEFAULT_INDEXES[direction]
-    local layers = belt_animation_set.animation_set.layers or {belt_animation_set.animation_set}
-    local layer_set = deepcopy(layers)
-    for _, layer in pairs(layer_set) do
+    local original_layers = belt_animation_set.animation_set.layers or {belt_animation_set.animation_set}
+    local new_layers = deepcopy(original_layers)
+    for _, layer in pairs(new_layers) do
       layer.y = layer.height * (index - 1)
       if layer.hr_version then
         layer.hr_version.y = layer.hr_version.height * (index - 1)
       end
     end
-    out[direction] = { layers = layers }
+    out[direction] = { layers = new_layers }
   end
   return out
 end
@@ -26,8 +26,8 @@ local function extract_belt_sprites(proto)
     return extract_sprites_from_animation_set(proto.belt_animation_set)
   end
   return {
-    north = proto.belt_vertical,
-    east = proto.belt_horizontal,
+    north = deepcopy(proto.belt_vertical),
+    east = deepcopy(proto.belt_horizontal),
     south = merge{proto.belt_vertical, { scale = -1 }},
     west = merge{proto.belt_horizontal, { scale = -1 }},
   }
@@ -46,15 +46,14 @@ local function make_placeable_by(entity_proto)
   return placeable_by
 end
 
-local function add_tint(proto, tint)
-  for k,v in pairs(proto) do
+local function add_tint(t, tint)
+  for _, v in pairs(t) do
     if type(v) == "table" then
-      if v.filename and v.width and v.height and not v.tint then
-        v.tint = tint
-      else
-        add_tint(v, tint)
-      end
+      add_tint(v, tint)
     end
+  end
+  if t.filename and t.width and t.height and not t.tint then
+    t.tint = tint
   end
 end
 
