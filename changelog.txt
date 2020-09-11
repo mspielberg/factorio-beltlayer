@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: ???
+Date: ???
+  Bugfixes:
+    - Fix accidental sprite tinting. (https://mods.factorio.com/mod/beltlayer/discussion/5f5b26f2096f9ddfc83914da)
+---------------------------------------------------------------------------------------------------
 Version: 1.0.2
 Date: 2020-09-10
   Bugfixes:
