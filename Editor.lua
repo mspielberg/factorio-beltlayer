@@ -88,10 +88,11 @@ function Editor:create_entity_args_for_editor_entity(bpproxy)
   if name == "entity-ghost" then name = bpproxy.ghost_name end
   local type, nonproxy_name =
     name:match("^beltlayer%-([^-]*)%-?bpproxy%-(.*)$")
-  if not type then return create_args end
   create_args.direction = bpproxy.direction
   create_args.type = type
-  create_args.name = nonproxy_name
+  if nonproxy_name then
+    create_args.name = nonproxy_name
+  end
   return create_args
 end
 
