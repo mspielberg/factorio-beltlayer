@@ -483,7 +483,7 @@ function Editor:on_player_setup_blueprint(event)
   end
 end
 
-function Editor:on_put_item(event)
+function Editor:on_pre_build(event)
   local player = game.players[event.player_index]
   local stack = player.cursor_stack
   if stack and stack.valid_for_read and is_connector_name(stack.name) then
@@ -498,7 +498,7 @@ function Editor:on_put_item(event)
       end
     end
   end
-  super.on_put_item(self, event)
+  super.on_pre_build(self, event)
 end
 
 function Editor:script_raised_built(event)

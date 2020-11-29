@@ -200,22 +200,3 @@ end
 for _, proto in pairs(data.raw["splitter"]) do
   data:extend{make_splitter_proxy(proto)}
 end
-
-local function make_migration_proxy(proto)
-  local proxy_proto = deepcopy(proto)
-  proxy_proto.name = util.proxy_name(proto.name)
-  proxy_proto.localised_name = {"entity-name.beltlayer-bpproxy", proto.localised_name or {"entity-name."..proto.name}}
-  proxy_proto.collision_mask = {}
-  proxy_proto.next_upgrade = nil
-  add_tint(proxy_proto, {r = 1.5, g = 0.5, b = 0.8, a = 0.25})
-  return proxy_proto
-end
-
-for _, type in ipairs{"underground-belt"} do
-  for _, proto in pairs(data.raw[type]) do
-    if proto.minable and not proto.name:find("^beltlayer%-bpproxy%-") then
-      local bpproxy = make_migration_proxy(proto)
-      data:extend{bpproxy}
-    end
-  end
-end

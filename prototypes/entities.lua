@@ -46,7 +46,7 @@ local function make_connector(ug)
 
   if mods["space-exploration"] then
     loader.collision_mask = loader.collision_mask
-      or { "floor-layer", "object-layer", "water-tile" }
+      or { "object-layer", "item-layer", "water-tile", "transport-belt-layer" }
     table.insert(loader.collision_mask, space_collision_layer)
   end
 
