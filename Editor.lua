@@ -1,5 +1,6 @@
 local BaseEditor = require "lualib.BaseEditor.BaseEditor"
 local Connector = require "Connector"
+local opposite_direction = util.oppositedirection
 local util = require "util"
 
 local M = {}
@@ -61,8 +62,8 @@ local function connector_in_area(surface, area)
   return false
 end
 
-local function opposite_type(loader_type)
-  if loader_type == "input" then
+local function opposite_type(linked_belt_type)
+  if linked_belt_type == "input" then
     return "output"
   end
   return "input"
@@ -109,11 +110,11 @@ local function on_built_surface_connector(self, creator, entity, stack)
   local force = entity.force
 
   local direction = entity.direction
-  local loader_type = opposite_type(entity.loader_type)
+  local linked_belt_type = opposite_type(entity.linked_belt_type)
   local editor_surface = self:editor_surface_for_aboveground_surface(entity.surface)
 
   -- check for existing underground connector
-  local underground_connector = editor_surface.find_entities_filtered{position = position, type = "loader-1x1"}[1]
+  local underground_connector = editor_surface.find_entities_filtered{position = position, type = "linked-belt"}[1]
   local belt_item_inventory
   local left_tl_count
   if underground_connector then
@@ -133,17 +134,17 @@ local function on_built_surface_connector(self, creator, entity, stack)
 
   -- check for existing underground connector ghost
   local underground_ghost = editor_surface.find_entity("entity-ghost", position)
-  if underground_ghost and underground_ghost.ghost_type == "loader-1x1" then
+  if underground_ghost and underground_ghost.ghost_type == "linked-belt" then
     direction = underground_ghost.direction
-    loader_type = underground_ghost.loader_type
-    entity.loader_type = opposite_type(loader_type)
+    linked_belt_type = underground_ghost.linked_belt_type
+    entity.linked_belt_type = opposite_type(linked_belt_type)
   end
 
   local underground_connector = editor_surface.create_entity{
     name = entity.name,
     position = position,
     direction = direction,
-    type = loader_type,
+    type = linked_belt_type,
     force = force,
   }
 
@@ -154,6 +155,8 @@ local function on_built_surface_connector(self, creator, entity, stack)
 
   underground_connector.last_user = entity.last_user
   underground_connector.minable = false
+
+  underground_connector.connect_linked_belts(entity)
 
   -- replace items if needed
   if belt_item_inventory then
@@ -171,29 +174,6 @@ local function on_built_surface_connector(self, creator, entity, stack)
     end
     belt_item_inventory.destroy()
   end
-
-  -- create buffer containers
-  local above_container = entity.surface.find_entity("beltlayer-buffer", position)
-  if not above_container then
-    above_container = entity.surface.create_entity{
-      name = "beltlayer-buffer",
-      position = position,
-      force = force,
-    }
-    above_container.destructible = false
-  end
-
-  local below_container = editor_surface.find_entity("beltlayer-buffer", position)
-  if not below_container then
-    below_container = editor_surface.create_entity{
-      name = "beltlayer-buffer",
-      position = position,
-      force = force,
-    }
-    below_container.destructible = false
-  end
-
-  Connector.new(entity, above_container, below_container)
 end
 
 local function re_place_belt(surface, position)
@@ -337,28 +317,31 @@ end
 
 local handling_rotation = false
 function Editor:on_player_rotated_entity(event)
-  if handling_rotation then return end
   local entity = event.entity
   if not entity or not entity.valid then return end
   if is_connector(entity) then
+    local direction = opposite_direction(event.previous_direction)
+    local linked_belt_type = entity.linked_belt_type
+    entity.direction = direction
+    entity.linked_belt_type = opposite_type(linked_belt_type)
+
     handling_rotation = true
     local surface = entity.surface
     if self:is_editor_surface(surface) then
       local aboveground_surface = self:aboveground_surface_for_editor_surface(surface)
       local above_connector = aboveground_surface.find_entity(entity.name, entity.position)
       if above_connector then
-        above_connector.rotate{by_player = event.player_index}
-        Connector.for_entity(above_connector):rotate()
+        above_connector.direction = direction
+        above_connector.linked_belt_type = linked_belt_type
       end
     elseif self:is_valid_aboveground_surface(surface) then
       local editor_surface = self:editor_surface_for_aboveground_surface(surface)
       local below_connector = editor_surface.find_entity(entity.name, entity.position)
       if below_connector then
-        below_connector.rotate{by_player = event.player_index}
+        below_connector.direction = direction
+        below_connector.linked_belt_type = linked_belt_type
       end
-      Connector.for_entity(entity):rotate()
     end
-    handling_rotation = false
   end
 end
 
@@ -488,7 +471,7 @@ function Editor:on_pre_build(event)
   local stack = player.cursor_stack
   if stack and stack.valid_for_read and is_connector_name(stack.name) then
     local existing_entities =
-      player.surface.find_entities_filtered{position = event.position, type = "loader-1x1"}
+      player.surface.find_entities_filtered{position = event.position, type = "linked-belt"}
     for _, entity in pairs(existing_entities) do
       if is_connector(entity) then
         upgrade_in_progress = {

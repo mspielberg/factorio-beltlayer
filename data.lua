@@ -1,1 +1,1 @@
-require("prototypes.custominput")
+require "prototypes.custominput"
