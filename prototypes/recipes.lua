@@ -72,4 +72,4 @@ for _, recipe in pairs(data.raw.recipe) do
     new_recipes[#new_recipes+1] = connector_recipe
   end
 end
---data:extend(new_recipes)
+data:extend(new_recipes)

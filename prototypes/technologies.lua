@@ -22,7 +22,7 @@ for _, tech in pairs(data.raw.technology) do
     for i, effect in ipairs(tech.effects) do
       if effect.type == "unlock-recipe" then
         local recipe = data.raw.recipe[effect.recipe]
-        if false and recipe then
+        if recipe then
           if find_underground_belt_result(recipe) then
             table.insert(
               tech.effects,

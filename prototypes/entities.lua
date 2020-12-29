@@ -54,11 +54,13 @@ end
 local function make_migration_connector(ug)
   local migration_connector = util.table.deepcopy(ug)
   migration_connector.name = ug.name.."-beltlayer-connector"
+  migration_connector.type = "loader-1x1"
+  migration_connector.filter_count = 0
   return migration_connector
 end
 
 for name, ug in pairs(data.raw["underground-belt"]) do
   if ug.minable and not name:find("beltlayer%-connector") then
-    data:extend{--[[make_connector(ug), ]]make_migration_connector(ug)}
+    data:extend{make_connector(ug), make_migration_connector(ug)}
   end
 end

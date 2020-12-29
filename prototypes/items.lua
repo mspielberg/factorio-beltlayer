@@ -32,7 +32,7 @@ for _, item in pairs(data.raw.item) do
   local place_result = item.place_result
   if place_result then
     if data.raw["underground-belt"][place_result] then
-      --data:extend{make_item(item)}
+      data:extend{make_item(item)}
     end
   end
 end
