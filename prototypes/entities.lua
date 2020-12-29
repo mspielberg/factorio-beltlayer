@@ -17,16 +17,16 @@ local overlay_icon = {
 }
 
 local function make_connector(ug)
-  local name = ug.name.."-beltlayer-connector"
-  local loader = util.table.deepcopy(ug)
-  loader.type = "linked-belt"
-  loader.name = name
-  loader.localised_name = {"entity-name.beltlayer-connector", ug.localised_name or {"entity-name."..ug.name}}
-  loader.localised_description = {"entity-description.beltlayer-connector"}
-  if loader.icons then
-    table.insert(loader.icons, overlay_icon)
+  local name = ug.name:gsub("underground%-belt", "beltlayer-connector")
+  local connector = util.table.deepcopy(ug)
+  connector.type = "linked-belt"
+  connector.name = name
+  connector.localised_name = {"entity-name.beltlayer-connector", ug.localised_name or {"entity-name."..ug.name}}
+  connector.localised_description = {"entity-description.beltlayer-connector"}
+  if connector.icons then
+    table.insert(connector.icons, overlay_icon)
   else
-    loader.icons = {
+    connector.icons = {
       {
         icon = ug.icon,
         icon_size = ug.icon_size,
@@ -34,26 +34,31 @@ local function make_connector(ug)
       overlay_icon,
     }
   end
-  loader.minable.result = name
-  loader.max_distance = nil
-  loader.underground_sprite = nil
-  loader.underground_remove_belts_sprite = nil
-  loader.fast_replaceable_group = "beltlayer-connector"
-  loader.next_upgrade = loader.next_upgrade and loader.next_upgrade .. "-beltlayer-connector"
+  connector.minable.result = name
+  connector.max_distance = nil
+  connector.underground_sprite = nil
+  connector.underground_remove_belts_sprite = nil
+  connector.fast_replaceable_group = "beltlayer-connector"
+  connector.next_upgrade =
+    connector.next_upgrade and connector.next_upgrade:gsub("underground%-belt", "beltlayer-connector")
 
   if mods["space-exploration"] then
-    loader.collision_mask = loader.collision_mask
+    connector.collision_mask = connector.collision_mask
       or { "object-layer", "item-layer", "water-tile", "transport-belt-layer" }
-    table.insert(loader.collision_mask, space_collision_layer)
+    table.insert(connector.collision_mask, space_collision_layer)
   end
 
-  return loader
+  return connector
+end
+
+local function make_migration_connector(ug)
+  local migration_connector = util.table.deepcopy(ug)
+  migration_connector.name = ug.name.."-beltlayer-connector"
+  return migration_connector
 end
 
 for name, ug in pairs(data.raw["underground-belt"]) do
-  if ug.minable then
-    data:extend{make_connector(ug)}
+  if ug.minable and not name:find("beltlayer%-connector") then
+    data:extend{--[[make_connector(ug), ]]make_migration_connector(ug)}
   end
 end
-
-data:extend{beltlayer_buffer}

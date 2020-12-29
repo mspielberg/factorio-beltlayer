@@ -19,8 +19,8 @@ end
 
 local function make_recipe(proto, base_result)
   local recipe = util.table.deepcopy(proto)
-  recipe.name = recipe.name.."-beltlayer-connector"
-  local connector_item = base_result.."-beltlayer-connector"
+  recipe.name = recipe.name:gsub("underground%-belt", "beltlayer-connector")
+  local connector_item = base_result:gsub("underground%-belt", "beltlayer-connector")
   for _, root in ipairs{recipe, recipe.normal, recipe.expensive} do
     if root then
       root.icons = nil
@@ -72,4 +72,4 @@ for _, recipe in pairs(data.raw.recipe) do
     new_recipes[#new_recipes+1] = connector_recipe
   end
 end
-data:extend(new_recipes)
+--data:extend(new_recipes)

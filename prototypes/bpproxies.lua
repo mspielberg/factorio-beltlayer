@@ -138,8 +138,10 @@ local function make_underground_belt_proxies(proto)
   return out
 end
 
-for _, proto in pairs(data.raw["underground-belt"]) do
-  data:extend(make_underground_belt_proxies(proto))
+for name, proto in pairs(data.raw["underground-belt"]) do
+  if not name:find("beltlayer%-connector") then
+    data:extend(make_underground_belt_proxies(proto))
+  end
 end
 
 local function rotated_point(point, direction)

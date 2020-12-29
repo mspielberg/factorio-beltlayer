@@ -1,5 +1,4 @@
 local configchange = require "configchange"
-local Connector = require "Connector"
 local Editor = require "Editor"
 
 local editor
@@ -7,22 +6,15 @@ local editor
 local function on_init()
   global.editor = Editor.new()
   editor = global.editor
-  Connector.on_init()
 end
 
 local function on_load()
   if global.editor then
     editor = Editor.restore(global.editor)
   end
-  Connector.on_load()
-end
-
-local function on_runtime_mod_setting_changed(event)
-  Connector.on_runtime_mod_setting_changed(event.player_index, event.setting, event.setting_type)
 end
 
 local function on_tick(event)
-  Connector.on_tick(event.tick)
   editor:on_tick(event)
 end
 
@@ -44,7 +36,6 @@ local event_handlers = {
   on_pre_player_mined_item         = function(event) editor:on_pre_player_mined_item(event)         end,
   on_robot_built_entity            = function(event) editor:on_robot_built_entity(event)            end,
   on_robot_mined_entity            = function(event) editor:on_robot_mined_entity(event)            end,
-  on_runtime_mod_setting_changed   = on_runtime_mod_setting_changed,
   script_raised_built              = function(event) editor:script_raised_built(event)              end,
   script_raised_destroy            = function(event) editor:script_raised_destroy(event)            end,
   script_raised_revive             = function(event) editor:script_raised_revive(event)             end,

@@ -1,6 +1,5 @@
 local BaseEditor = require "lualib.BaseEditor.BaseEditor"
-local Connector = require "Connector"
-local opposite_direction = util.oppositedirection
+local core_util = require "__core__.lualib.util"
 local util = require "util"
 
 local M = {}
@@ -81,6 +80,12 @@ function Editor:nonproxy_name(entity)
     return entity.name:sub(last + 1)
   end
   return nil
+end
+
+function Editor:upgrade_name(entity_to_upgrade, target_proto)
+  return util.proxy_name(
+    target_proto.name,
+    entity_to_upgrade.type == "underground-belt" and entity_to_upgrade.belt_to_ground_type)
 end
 
 function Editor:create_entity_args_for_editor_entity(bpproxy)
@@ -269,20 +274,10 @@ local function upgrade_in_progress_matches(entity)
 end
 
 local function on_mined_surface_connector(self, entity, buffer)
-  local above_container = entity.surface.find_entity("beltlayer-buffer", entity.position)
   local editor_surface = self:editor_surface_for_aboveground_surface(entity.surface)
-  local below_container = editor_surface.find_entity("beltlayer-buffer", entity.position)
   local underground_connector = editor_surface.find_entity(entity.name, entity.position)
   if buffer then
-    if not upgrade_in_progress_matches(entity) then
-      insert_container_inventory_to_buffer(above_container, buffer)
-      insert_container_inventory_to_buffer(below_container, buffer)
-    end
     insert_transport_lines_to_buffer(underground_connector, buffer)
-  end
-  if not upgrade_in_progress_matches(entity) then
-    above_container.destroy()
-    below_container.destroy()
   end
   underground_connector.destroy()
 end
@@ -315,31 +310,32 @@ function Editor:on_robot_mined_entity(event)
   end
 end
 
-local handling_rotation = false
 function Editor:on_player_rotated_entity(event)
   local entity = event.entity
   if not entity or not entity.valid then return end
   if is_connector(entity) then
-    local direction = opposite_direction(event.previous_direction)
+    local direction = core_util.oppositedirection(event.previous_direction)
     local linked_belt_type = entity.linked_belt_type
-    entity.direction = direction
+    entity.disconnect_linked_belts()
+    entity.direction = event.previous_direction
     entity.linked_belt_type = opposite_type(linked_belt_type)
 
-    handling_rotation = true
     local surface = entity.surface
     if self:is_editor_surface(surface) then
       local aboveground_surface = self:aboveground_surface_for_editor_surface(surface)
       local above_connector = aboveground_surface.find_entity(entity.name, entity.position)
       if above_connector then
-        above_connector.direction = direction
         above_connector.linked_belt_type = linked_belt_type
+        above_connector.direction = entity.direction
+        entity.connect_linked_belts(above_connector)
       end
     elseif self:is_valid_aboveground_surface(surface) then
       local editor_surface = self:editor_surface_for_aboveground_surface(surface)
       local below_connector = editor_surface.find_entity(entity.name, entity.position)
       if below_connector then
-        below_connector.direction = direction
         below_connector.linked_belt_type = linked_belt_type
+        below_connector.direction = entity.direction
+        entity.connect_linked_belts(below_connector)
       end
     end
   end
@@ -405,16 +401,6 @@ function Editor:on_player_deconstructed_area(event)
   if event.alt then return end
   local player = game.players[event.player_index]
   on_player_deconstructed_area(self, player, event.area, player.cursor_stack)
-end
-
-function Editor:on_marked_for_deconstruction(event)
-  local entity = event.entity
-  local player = event.player_index and game.players[event.player_index]
-  if entity.name == "beltlayer-buffer" then
-    entity.cancel_deconstruction(player and player.force or entity.force)
-  else
-    super.on_marked_for_deconstruction(self, event)
-  end
 end
 
 function Editor:on_marked_for_upgrade(event)
