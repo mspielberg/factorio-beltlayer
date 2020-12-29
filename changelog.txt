@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.0
+Date: 2020-12-29
+  Major Features:
+    - Beltlayer now uses linked belts instead of loaders and chests.
+    - Connectors preserve which side of the belt items are on.
+    - This is a major change. Blueprints with beltlayer connectors in them must be re-created. Expect bugs.
+  Bugfixes:
+    - Fix crash when marking an underground belt for upgrade in the underground layer. (https://mods.factorio.com/mod/beltlayer/discussion/5feb702ddf256608d2c011bb)
+---------------------------------------------------------------------------------------------------
 Version: 1.1.0
 Date: 2020-11-30
   Info:
