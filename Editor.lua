@@ -36,7 +36,7 @@ local function find_in_area(args)
 end
 
 local function is_connector_name(name)
-  return name:find("%-beltlayer%-connector$")
+  return name:find("beltlayer%-connector")
 end
 
 local function is_connector(entity)
