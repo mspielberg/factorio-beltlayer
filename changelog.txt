@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.1
+Date: 2020-12-29
+  Bugfixes:
+    - Fix beltlayer connectors migrated from 1.x saves becoming owned by the enemy force.
+    - Fix yellow beltlayer connectors not having the correct behavior.
+---------------------------------------------------------------------------------------------------
 Version: 2.0.0
 Date: 2020-12-29
   Major Features:
