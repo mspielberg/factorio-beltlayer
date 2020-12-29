@@ -94,7 +94,10 @@ add_migration{
         if loader.name:find("beltlayer%-connector") then
           local position = loader.position
           local direction = loader.direction
+          local force = loader.force
           local connector_type = loader.loader_type
+          local last_user = loader.last_user
+
           local connector_name = loader.name:gsub("underground%-belt%-", "")
           local counterpart_connector = counterpart_surface.find_entity(loader.name, position)
 
@@ -105,7 +108,9 @@ add_migration{
               position = position,
               direction = direction,
               type = connector_type,
+              force = force,
             }
+            connector.last_user = last_user
 
             counterpart_connector.destroy()
             counterpart_connector = counterpart_surface.create_entity{
@@ -113,7 +118,9 @@ add_migration{
               position = position,
               direction = direction,
               type = connector_type == "input" and "output" or "input",
+              force = force,
             }
+            counterpart_connector.last_user = last_user
             connector.connect_linked_belts(counterpart_connector)
           end
         end
