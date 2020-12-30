@@ -9,8 +9,8 @@ local function remove_orphans()
   local removed_connectors = 0
   for _, surface in pairs(game.surfaces) do
     local did_remove_connector = false
-    local counterpart_surface = global.editor:counterpart_surface(surface)
-    if counterpart_surface then
+    local editor_surface = global.editor:editor_surface_for_aboveground_surface(surface)
+    if editor_surface then
       for _, linked_belt in pairs(surface.find_entities_filtered{type = "linked-belt"}) do
         if linked_belt.name:find("beltlayer%-connector") and not linked_belt.linked_belt_neighbour then
           linked_belt.destroy()
@@ -84,44 +84,50 @@ add_migration{
 }
 
 add_migration{
-  name = "v2_0_0_repalce_with_linked_belts",
+  name = "v2_0_0_replace_with_linked_belts",
   version = {2,0,0},
   task = function()
-    Editor.restore(global.editor)
+    local editor = global.editor
+    Editor.restore(editor)
     for _, surface in pairs(game.surfaces) do
-      local counterpart_surface = global.editor:counterpart_surface(surface)
-      for _, loader in pairs(surface.find_entities_filtered{type = "loader-1x1"}) do
-        if loader.name:find("beltlayer%-connector") then
-          local position = loader.position
-          local direction = loader.direction
-          local force = loader.force
-          local connector_type = loader.loader_type
-          local last_user = loader.last_user
+      if editor:is_valid_aboveground_surface(surface) then
+        local editor_surface = editor:editor_surface_for_aboveground_surface(surface)
+        for _, loader in pairs(surface.find_entities_filtered{type = "loader-1x1"}) do
+          if loader.name:find("beltlayer%-connector") then
+            local position = loader.position
+            local direction = loader.direction
+            local force = loader.force
+            local connector_type = loader.loader_type
+            local last_user = loader.last_user
 
-          local connector_name = loader.name:gsub("underground%-belt%-", "")
-          local counterpart_connector = counterpart_surface.find_entity(loader.name, position)
+            local connector_name = loader.name:gsub("underground%-belt%-", "")
+            local editor_connector = editor_surface.find_entity(loader.name, position)
 
-          if counterpart_connector then
-            loader.destroy()
-            local connector = surface.create_entity{
-              name = connector_name,
-              position = position,
-              direction = direction,
-              type = connector_type,
-              force = force,
-            }
-            connector.last_user = last_user
+            if editor_connector then
+              loader.destroy()
+              local connector = surface.create_entity{
+                name = connector_name,
+                position = position,
+                direction = direction,
+                type = connector_type,
+                force = force,
+                create_build_effect_smoke = false,
+              }
+              connector.last_user = last_user
 
-            counterpart_connector.destroy()
-            counterpart_connector = counterpart_surface.create_entity{
-              name = connector_name,
-              position = position,
-              direction = direction,
-              type = connector_type == "input" and "output" or "input",
-              force = force,
-            }
-            counterpart_connector.last_user = last_user
-            connector.connect_linked_belts(counterpart_connector)
+              editor_connector.destroy()
+              editor_connector = editor_surface.create_entity{
+                name = connector_name,
+                position = position,
+                direction = direction,
+                type = connector_type == "input" and "output" or "input",
+                force = force,
+                create_build_effect_smoke = false,
+              }
+              editor_connector.last_user = last_user
+              editor_connector.minable = false
+              connector.connect_linked_belts(editor_connector)
+            end
           end
         end
       end
@@ -129,6 +135,24 @@ add_migration{
     game.print("Beltlayer updated from version 1.x.\n"..
       "The names of beltlayer connectors have changed as part of this upgrade.\n"..
       "Any blueprints with [entity=beltlayer-connector] [color=red]must be re-created.[/color]")
+  end,
+}
+
+add_migration{
+  name = "v2_0_2_make_underground_connector_unminable",
+  version = {2,0,2},
+  task = function()
+    local editor = global.editor
+    Editor.restore(editor)
+    for _, surface in pairs(game.surfaces) do
+      if editor:is_editor_surface(surface) then
+        for _, linked_belt in pairs(surface.find_entities_filtered{type = "linked-belt"}) do
+          if linked_belt.name:find("beltlayer%-connector") then
+            linked_belt.minable = false
+          end
+        end
+      end
+    end
   end,
 }
 

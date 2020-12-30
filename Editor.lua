@@ -70,7 +70,8 @@ end
 
 function Editor:proxy_name(entity)
   local entity_name = entity.type == "entity-ghost" and entity.ghost_name or entity.name
-  return util.proxy_name(entity_name, entity.type == "underground-belt" and entity.belt_to_ground_type)
+  local entity_type = entity.type == "entity-ghost" and entity.ghost_type or entity.type
+  return util.proxy_name(entity_name, entity_type == "underground-belt" and entity.belt_to_ground_type)
 end
 
 function Editor:nonproxy_name(entity)
