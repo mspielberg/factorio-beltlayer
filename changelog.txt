@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.2
+Date: 2020-12-30
+  Bugfixes:
+    - Fix migration leaving it possible to mine underground connectors. (https://mods.factorio.com/mod/beltlayer/discussion/5fec29d3ae469395d4428309)
+    - Fix underground belt ghosts not being creatable in the underground layer. (https://mods.factorio.com/mod/beltlayer/discussion/5fecefccae469395d489d77b)
+---------------------------------------------------------------------------------------------------
 Version: 2.0.1
 Date: 2020-12-29
   Bugfixes:
