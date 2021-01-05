@@ -1,4 +1,5 @@
-require "util"
+local deepcopy = util.table.deepcopy
+local util = require "util"
 
 local overlay_icon = {
   icon = "__core__/graphics/icons/mip/collapse.png",
@@ -10,8 +11,8 @@ local overlay_icon = {
 }
 
 local function make_item(proto)
-  local item = util.table.deepcopy(proto)
-  item.name = item.name:gsub("underground%-belt", "beltlayer-connector")
+  local item = deepcopy(proto)
+  item.name = util.connector_name(item.name)
   item.localised_name = data.raw["linked-belt"][item.name].localised_name
   item.place_result = item.name
   if item.icons then

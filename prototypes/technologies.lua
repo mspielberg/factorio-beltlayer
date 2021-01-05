@@ -1,3 +1,5 @@
+local util = require "util"
+
 local function find_underground_belt_result(recipe)
   for _, root in ipairs{recipe, recipe.normal, recipe.expensive} do
     if root then
@@ -29,7 +31,7 @@ for _, tech in pairs(data.raw.technology) do
               i + 1,
               {
                 type = "unlock-recipe",
-                recipe = effect.recipe:gsub("underground%-belt", "beltlayer-connector"),
+                recipe = util.connector_name(effect.recipe),
               }
             )
           end

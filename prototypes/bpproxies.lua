@@ -104,7 +104,7 @@ local function make_underground_belt_sprites(proto, belt_to_ground_type)
           sheet.hr_version.width * (underground_belt_sprite_index[belt_to_ground_type][direction] - 1)
       end
     end
-    local layers = deepcopy(belt_sprite.layers)
+    local layers = belt_sprite.layers and deepcopy(belt_sprite.layers) or {deepcopy(belt_sprite)}
     for i = 1, #structure_sheets do
       layers[#belt_sprite + i] = structure_sheets[i]
     end

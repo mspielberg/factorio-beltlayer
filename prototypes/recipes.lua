@@ -1,4 +1,5 @@
-require "util"
+local deepcopy = util.table.deepcopy
+local util = require "util"
 
 local function find_underground_belt_result(recipe)
   for _, root in ipairs{recipe, recipe.normal, recipe.expensive} do
@@ -18,9 +19,9 @@ local function find_underground_belt_result(recipe)
 end
 
 local function make_recipe(proto, base_result)
-  local recipe = util.table.deepcopy(proto)
-  recipe.name = recipe.name:gsub("underground%-belt", "beltlayer-connector")
-  local connector_item = base_result:gsub("underground%-belt", "beltlayer-connector")
+  local recipe = deepcopy(proto)
+  recipe.name = util.connector_name(recipe.name)
+  local connector_item = util.connector_name(base_result)
   for _, root in ipairs{recipe, recipe.normal, recipe.expensive} do
     if root then
       root.icons = nil

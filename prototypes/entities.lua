@@ -1,4 +1,5 @@
-require "util"
+local deepcopy = util.table.deepcopy
+local util = require "util"
 
 local empty_sprite = {
   filename = "__core__/graphics/empty.png",
@@ -17,8 +18,8 @@ local overlay_icon = {
 }
 
 local function make_connector(ug)
-  local name = ug.name:gsub("underground%-belt", "beltlayer-connector")
-  local connector = util.table.deepcopy(ug)
+  local name = util.connector_name(ug.name)
+  local connector = deepcopy(ug)
   connector.type = "linked-belt"
   connector.name = name
   connector.localised_name = {"entity-name.beltlayer-connector", ug.localised_name or {"entity-name."..ug.name}}
@@ -40,7 +41,7 @@ local function make_connector(ug)
   connector.underground_remove_belts_sprite = nil
   connector.fast_replaceable_group = "beltlayer-connector"
   connector.next_upgrade =
-    connector.next_upgrade and connector.next_upgrade:gsub("underground%-belt", "beltlayer-connector")
+    connector.next_upgrade and util.connector_name(connector.next_upgrade)
 
   if mods["space-exploration"] then
     connector.collision_mask = connector.collision_mask
@@ -52,7 +53,7 @@ local function make_connector(ug)
 end
 
 local function make_migration_connector(ug)
-  local migration_connector = util.table.deepcopy(ug)
+  local migration_connector = deepcopy(ug)
   migration_connector.name = ug.name.."-beltlayer-connector"
   migration_connector.type = "loader-1x1"
   migration_connector.filter_count = 0

@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.3
+Date: 2021-01-04
+  Bugfixes:
+    - Fix crash on startup with Yuoki Industries - Engines. (https://mods.factorio.com/mod/beltlayer/discussion/5fd76829f41eb1ecc8129ae4)
+---------------------------------------------------------------------------------------------------
 Version: 2.0.2
 Date: 2020-12-30
   Bugfixes:
