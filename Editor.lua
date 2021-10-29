@@ -409,7 +409,7 @@ function Editor:on_marked_for_upgrade(event)
   if is_connector(entity) then
     local surface = self:counterpart_surface(entity.surface)
     local counterpart = surface and surface.find_entity(entity.name, entity.position)
-    if counterpart then
+    if counterpart and counterpart.get_upgrade_target() ~= event.target then
       counterpart.order_upgrade{force = counterpart.force, player = event.player_index, target = event.target}
     end
   end

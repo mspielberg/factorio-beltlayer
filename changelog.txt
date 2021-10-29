@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.4
+Date: 2021-10-29
+  Bugfixes:
+    - Fix hang when marking connectors for upgrade. (https://mods.factorio.com/mod/beltlayer/discussion/6133c41bd266007a9868714c)
+---------------------------------------------------------------------------------------------------
 Version: 2.0.3
 Date: 2021-01-04
   Bugfixes:
