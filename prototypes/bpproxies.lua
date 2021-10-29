@@ -66,7 +66,7 @@ local function make_transport_belt_proxy(proto)
   proxy_proto.item_slot_count = 0
   proxy_proto.max_circuit_wire_distance = 0
   proxy_proto.localised_name = {"entity-name.beltlayer-bpproxy", proto.localised_name or {"entity-name."..proto.name}}
-  proxy_proto.minable_properties = deepcopy(proto.minable_properties)
+  proxy_proto.minable = deepcopy(proto.minable)
   proxy_proto.selection_box = deepcopy(proto.selection_box)
   proxy_proto.collision_box = deepcopy(proto.collision_box)
   proxy_proto.collision_mask = {}
@@ -122,7 +122,7 @@ local function make_underground_belt_proxies(proto)
     proxy_proto.icon_size = proto.icon_size
     proxy_proto.icons = proto.icons
     proxy_proto.localised_name = {"entity-name.beltlayer-bpproxy", proto.localised_name or {"entity-name."..proto.name}}
-    proxy_proto.minable_properties = deepcopy(proto.minable_properties)
+    proxy_proto.minable = deepcopy(proto.minable)
     proxy_proto.selection_box = deepcopy(proto.selection_box)
     proxy_proto.collision_box = deepcopy(proto.collision_box)
     proxy_proto.collision_mask = {}
@@ -186,7 +186,7 @@ local function make_splitter_proxy(proto)
   proxy_proto.icon_size = proto.icon_size
   proxy_proto.icons = proto.icons
   proxy_proto.localised_name = {"entity-name.beltlayer-bpproxy", proto.localised_name or {"entity-name."..proto.name}}
-  proxy_proto.minable_properties = deepcopy(proto.minable_properties)
+  proxy_proto.minable = deepcopy(proto.minable)
   proxy_proto.selection_box = deepcopy(proto.selection_box)
   proxy_proto.collision_box = deepcopy(proto.collision_box)
   proxy_proto.collision_mask = {}
