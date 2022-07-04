@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.5
+Date: XXXX-XX-XX
+  Bugfixes:
+    - Restrict connector recipes to be created for recieps that result in at most 2 underground belts. (https://mods.factorio.com/mod/beltlayer/discussion/62a81a740bd49c3018586bb1)
+---------------------------------------------------------------------------------------------------
 Version: 2.0.4
 Date: 2021-10-29
   Bugfixes:

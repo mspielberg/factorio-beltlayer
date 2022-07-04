@@ -1,23 +1,6 @@
 local deepcopy = util.table.deepcopy
 local util = require "util"
 
-local function find_underground_belt_result(recipe)
-  for _, root in ipairs{recipe, recipe.normal, recipe.expensive} do
-    if root then
-      local results = root.results or {{name = root.result}}
-      for _, result in ipairs(results) do
-        local item_name = result.name or result[1]
-        local item = data.raw.item[item_name]
-        if item and item.place_result then
-          if data.raw["underground-belt"][item.place_result] then
-            return item_name
-          end
-        end
-      end
-    end
-  end
-end
-
 local function make_recipe(proto, base_result)
   local recipe = deepcopy(proto)
   recipe.name = util.connector_name(recipe.name)
@@ -67,7 +50,7 @@ end
 
 local new_recipes = {}
 for _, recipe in pairs(data.raw.recipe) do
-  local underground_belt_result = find_underground_belt_result(recipe)
+  local underground_belt_result = util.find_underground_belt_result(recipe)
   if underground_belt_result then
     local connector_recipe = make_recipe(recipe, underground_belt_result)
     new_recipes[#new_recipes+1] = connector_recipe

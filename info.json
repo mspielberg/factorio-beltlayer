@@ -6,7 +6,8 @@
   "author": "Therax",
   "version": "2.0.4",
   "dependencies": [
-    "(?) boblogistics"
+    "(?) boblogistics",
+    "(?) nullius"
   ],
   "package": {
     "ignore": ["resources/*"]

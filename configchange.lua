@@ -3,6 +3,18 @@ local version = require "lualib.version"
 
 local M = {}
 
+local function enable_recipes()
+  for _, force in pairs(game.forces) do
+    for _, technology in pairs(force.technologies) do
+      for _, effect in pairs(technology.effects) do
+        if effect.type == 'unlock-recipe' and effect.recipe:find('beltlayer-connector') then
+          force.recipes[effect.recipe].enabled = technology.researched
+        end
+      end
+    end
+  end
+end
+
 local function remove_orphans()
   Editor.restore(global.editor)
   local affected_surfaces = 0
@@ -42,6 +54,7 @@ function M.on_mod_version_changed(old)
       migration.task()
     end
   end
+  enable_recipes()
   remove_orphans()
 end
 
