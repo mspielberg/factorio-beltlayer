@@ -57,6 +57,7 @@ local function make_migration_connector(ug)
   migration_connector.name = ug.name.."-beltlayer-connector"
   migration_connector.type = "loader-1x1"
   migration_connector.filter_count = 0
+  migration_connector.next_upgrade = nil
   return migration_connector
 end
 
