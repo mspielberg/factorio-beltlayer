@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.5
-Date: XXXX-XX-XX
+Date: 2022-07-04
   Bugfixes:
     - Restrict connector recipes to be created for recieps that result in at most 2 underground belts. (https://mods.factorio.com/mod/beltlayer/discussion/62a81a740bd49c3018586bb1)
     - Fix crash at startup with mods like Space Exploration that change underground belt collision masks. (https://mods.factorio.com/mod/beltlayer/discussion/615d747e9169a89900fc145d)
